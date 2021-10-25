@@ -40,23 +40,27 @@ rcylinder2<-function(n.cylinders, observation.matrix, week.range, radia_and_heig
     radia_and_heights = radia_and_heights[sample(1:nrow(radia_and_heights), n.cylinders, replace=T),]
     #randomise wilst keeping same radius and height and avoiding negative t
     rho = radia_and_heights[,2]
-    
     random_radia = runif(n.cylinders, 0, rho)
     theta = runif(n.cylinders, 0, 2* pi)
 
     y = y + sin(theta) * random_radia
     x = x + cos(theta) * random_radia
-    tt = t
-    t = t + round(runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2))
-    t.low = t - round(radia_and_heights[,1] / 2)
+    tt = t + runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2)
+    
+    t.low = floor(tt - radia_and_heights[,1] / 2)
     t.min = as.integer(week.range[1])
-    t.low = ifelse(t.low >= t.min, t.low, t.min)
 
-    t.upp = tt + round(radia_and_heights[,1] / 2)
+    t.upp = ceiling(tt + radia_and_heights[,1] / 2)
     t.max = as.integer(week.range[2])
+    
+    t.low = ifelse(t.low >= t.min, t.low, t.min)
     t.upp = ifelse(t.upp <= t.max, t.upp, t.max)
-
+    
     t.low = as.integer(ifelse(t.low == t.max, t.low - 1, t.low))
+    # isx = (t.low == t.upp)
+    # if (any(isx)){
+    #   print(c(t.low[isx], t.upp[isx]))
+    # }   
     
     return(data.frame(x=x, y=y, rho=rho, t.low=t.low, t.upp=t.upp))
   }else{
@@ -108,7 +112,6 @@ compute<-function(cylinder, observation.matrix, baseline.matrix, postcode.locati
   t.range = as.character(as.integer(cylinder['t.low']):as.integer(cylinder['t.upp']))
   observations = observation.matrix[,t.range]
   baselines = baseline.matrix[,t.range]
-  
   # # da vettorizzare:
   # in_circle<-apply(postcode.locations, 1, is_in_circle,
   #                  as.numeric(cylinder['x']), as.numeric(cylinder['y']), as.numeric(cylinder['rho']))
@@ -200,7 +203,7 @@ warning_ratio2<-function(i, observation.matrix, t, cylinders, postcode.locations
 }
 
 
-warning.score<-function(case, cylinders, date.time.field = 'SAMPLE_DT_numeric'){
+warning.score<-function(case, cylinders, date.time.field = 'week'){
   x = as.numeric(case['x'])
   y = as.numeric(case['y'])
   TT = as.numeric(case[date.time.field])

@@ -25,8 +25,11 @@ source("R/plot_utils.R")
 CreateCylinders<-function(observation.matrix, baseline.matrix,
                           week.range, n.cylinders=1000, rs=0.1,
                           p.val.threshold=0.05,
-                          coord.df=postcode2coord,
                           size_factor=1){
+  
+  load("~/rancovr/Data/postcode2coord.Rdata")  
+  coord.df=postcode2coord
+  
   observation.matrix = observation.matrix[!(rownames(observation.matrix) == 'NA'),]
   baseline.matrix = baseline.matrix[!(rownames(baseline.matrix) == 'NA'),]
   
@@ -63,12 +66,11 @@ CreateCylinders<-function(observation.matrix, baseline.matrix,
   
   # generate cylinders
   cylinders = rcylinder2(n.cylinders, observation.matrix, week.range, radia_and_heights, coord.km.df)
+
+#  print(any(cylinders$t.low == cylinders$t.upp))
   if (NROW(cylinders) > 0){
-    cylinders[,c('n_obs', 'mu', 'p.val')] = t(apply(cylinders, 1, compute,
-                                                    observation.matrix, baseline.matrix, coord.km.df))
-    ## da vettorizzare:
-    # cylinders$warning = apply(cylinders, 1, function(x){ifelse((x['p.val'] < p.val.threshold) & (x['n_obs'] > 0), TRUE, FALSE)})
-    # vettorizzato:
+    tmp = t(apply(cylinders, 1, compute, observation.matrix, baseline.matrix, coord.km.df))
+    cylinders[,c('n_obs', 'mu', 'p.val')] = tmp
     cylinders$warning = cylinders$p.val < p.val.threshold
   }else{
     cat("No cases in the selected week range.\n")
