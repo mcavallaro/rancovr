@@ -1,11 +1,7 @@
 
-source("utils.R")
-#library(sf)
-library(KernSmooth)
-#library(spatstat)
-#library(truncnorm)
-source("surveillance_utils.R")
-source("plot_utils.R")
+source("R/utils.R")
+source("R/surveillance_utils.R")
+source("R/plot_utils.R")
 
 #load('Data/postcode2coord.Rdata')
 # UK range (latitude and longitude)
@@ -24,9 +20,13 @@ source("plot_utils.R")
 #' @param n.cylinders (integer) number of proposed cylinders per week interval.
 #' @param rs
 #' @param p.val.threshold
-CreateCylinders<-function(observation.matrix, baseline.matrix, emmtype,
-                                 week.range, n.cylinders=1000, rs=0.1,
-                                 p.val.threshold=0.05, coord.df=postcode2coord, size_factor=1){
+
+
+CreateCylinders<-function(observation.matrix, baseline.matrix,
+                          week.range, n.cylinders=1000, rs=0.1,
+                          p.val.threshold=0.05,
+                          coord.df=postcode2coord,
+                          size_factor=1){
   observation.matrix = observation.matrix[!(rownames(observation.matrix) == 'NA'),]
   baseline.matrix = baseline.matrix[!(rownames(baseline.matrix) == 'NA'),]
   
@@ -40,7 +40,7 @@ CreateCylinders<-function(observation.matrix, baseline.matrix, emmtype,
     print(sum(observation.matrix))    
     warning(
       sprintf(
-        "Warning: the baseline is too high. Have you multiplied for the emmtype factor? e.g., `CreateCylinders(observation.matrix, baseline.matrix*emmtype.factor[['%s']], '%s', %d:%d, n.cylinders=100, rs=0.1)`", emmtype, emmtype, as.integer(week.range[1]), as.integer(week.range[2])
+        "Warning: the baseline might be too high. Please check that it is scaled by type factor."
       )
     )
   }
@@ -54,15 +54,12 @@ CreateCylinders<-function(observation.matrix, baseline.matrix, emmtype,
     B = sprintf("%d-%d", B[1], B[2])
     stop(paste0("`week.range`` is ", A, ", while the range of `observation.matrix` is ", B, "." ))
   }
-  # weeks = as.integer(colnames(observation.matrix)[-seq(1:(starting.week+2))])
-  # weeks = weeks[seq(1, length(weeks), 20)]
-  # cylinders0 = data.frame(x=double(), y=double(), rho=double(), t.low=integer(), t.upp=integer(), n_obs=integer(), mu=double(), lower=integer(), upper=integer(), p.val=double(), warning=logical())
+
   radia_and_heights = f_radia_and_heights(baseline.matrix, 1:24) * size_factor
   cat("Evaluating cylinder exceedances from ",
         as.character(week2Date(week.range[1])),   # this interactive output doesnt work in the prospective mode
         " to ",
-        as.character(week2Date(week.range[2])),        
-        " for emm type ", emmtype, ".\n")
+        as.character(week2Date(week.range[2])), ".\n")
   
   # generate cylinders
   cylinders = rcylinder2(n.cylinders, observation.matrix, week.range, radia_and_heights, coord.km.df)
@@ -93,10 +90,10 @@ ranScanCreateCylinders<-CreateCylinders
 #' @param baseline.matrix.untyped
 #' 
 CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
-                                 observation.matrix.untyped, baseline.matrix.untyped,
-                                 emmtype,
-                                 week.range, n.cylinders=1000, rs=0.1,
-                                 p.val.threshold=0.05, coord.df=postcode2coord,  size_factor=1){
+                                observation.matrix.untyped, baseline.matrix.untyped,
+                                emmtype,
+                                week.range, n.cylinders=1000, rs=0.1,
+                                p.val.threshold=0.05, coord.df=postcode2coord,  size_factor=1){
   observation.matrix.typed = as.matrix(observation.matrix.typed[!(rownames(observation.matrix.typed) == 'NA'),])
   baseline.matrix.typed = as.matrix(baseline.matrix.typed[!(rownames(baseline.matrix.typed) == 'NA'),])
   observation.matrix.untyped = as.matrix(observation.matrix.untyped[!(rownames(observation.matrix.untyped) == 'NA'),])
