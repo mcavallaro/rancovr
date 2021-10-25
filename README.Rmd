@@ -6,12 +6,23 @@ output:
     variant: markdown_github
 ---
 
+```{r}
+knitr::opts_knit$set(root.dir = "~/rancovr")
+getwd()
+```
+
 # Rancovr: Cluster detection with Random Neighbourhood Covering
 
 `rancovr` is a statistical software package written in R for the detection of disease clusters
 based on the  Random Neighbourhood Covering (RaNCover) of reference [1].
 `rancovr` assess whether a single recorded infection is part of a disease cluster (such that caused by a local outbreak)
 or is consistent with a baseline of sporadic cases.
+
+
+```{r include=TRUE}
+install.packages("devtools")
+devtools::install_github("mcavallaro/rancovr")
+```
 
 As a demonstration, we consider the spatio-temporal coordinates stored in `Data/synthetic_dataset.csv`,
 which represent records of infection cases and is obtained aggregating data simulated from an endemic component (`end.`) and
