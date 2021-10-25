@@ -44,9 +44,11 @@ baseline.matrix = CreateBaselineMatrix(case.df , save.on.dir = T)
 ```
 
 ```{r}
+load(file.path(getwd(), "observation_matrix_tmp.Rdata"), verbose=1)
 plot( time.factor, xlab = 'week', xaxt='n')
 lines(colSums(baseline.matrix))
- axis(side=1, at=1:length(time.factor), labels = names(time.factor))
+lines(colSums(observation.matrix))
+axis(side=1, at=1:length(time.factor), labels = names(time.factor))
 ```
 
 
@@ -55,23 +57,22 @@ Create  100,000 cyclinders to cover the detected cases:
 ```{r}
 cylinders = CreateCylinders(observation.matrix = observation.matrix,
                             baseline.matrix = baseline.matrix,
-                            emmtype = 'sim', week.range = c(0,99), n.cylinders = 100000,
-                            coord.df=coordinate.df)
+                            week.range = c(0,99), n.cylinders = 10000)
+head(cylinders)
 ```
 
 
 Compute the warning score for each case:
+```{r}
+case.df[,'warning.score'] = apply(case.df, 1, FUN=warning.score, cylinders)
+head(case.df)
 ```
-> source('R/surveillance_utilis.R)
-> case.df[,'warning.score'] = apply(case.df, 1, FUN=warning.score, cylinders)
-> head(case.df)
-   row SAMPLE_DT_numeric postcode latitude longitude population        y           x warning.score
-1  483                 0  BB120EZ 53.79724 -2.264622        157 5982.253  -67.346355   0.007518797
-2  488                 0  BB2 1HN 53.74896 -2.496710        113 5976.884  -74.560339   0.018292683
-3  555                 0  BB8 7AR 53.86487 -2.163336        109 5989.774  -63.955308   0.011764706
-4  973                 0  BN274EW 50.88265  0.263503        234 5658.151    9.803753   0.000000000
-5 1079                 0  BS106DD 51.50526 -2.603483         37 5727.385  -92.748101   0.014184397
-6 1142                 0  BS247EQ 51.34984 -2.917601        164 5710.103 -105.092027   0.014285714
+
+Assess concordance with ROC-ACU
+```{r}
+library(pROC)
+ROC = roc(ifelse(case.df$sim == 'end.', FALSE, TRUE), case.df$warning.score)
+plot(ROC)
 ```
 
 [1] M. Cavallaro, J. Coelho, D. Ready, V. Decraene, T. Lamagni, N. D. McCarthy, D. Todkill, M. J. Keeling,
