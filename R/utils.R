@@ -1,4 +1,3 @@
-library(jsonlite)
 
 save.and.tell<-function(variable.string, file=file.name){
   save(list=variable.string, file=file, envir = parent.frame())
@@ -29,11 +28,10 @@ postcode.to.location<-function(x, postcodes){
   return(res)
 }
 
-postcode.to.location.and.population<-function(x, postcodes){
-  library(jsonlite)
+postcode.to.location.and.population<-function(x, postcodes, postcode.field='postcode'){
   # A = gsub(" ", "", toupper(postcodes['Patient.Postcode']),  fixed = TRUE)
-  B = gsub(" ", "", toupper(x['Patient Postcode']),  fixed = TRUE)
-  idx = B == postcodes['Patient.Postcode']
+  B = gsub(" ", "", toupper(x[postcode.field]),  fixed = TRUE)
+  idx = B == postcodes[postcode.field]
   s = sum(idx)
   if (is.na(s)){
     res=c(NA,NA,NA)
@@ -52,8 +50,8 @@ postcode.to.location.and.population<-function(x, postcodes){
   return(res)
 }
 
-postcode.in.england<-function(x, column='Patient Postcode'){
-  jsn = read_json(paste0("http://api.getthedata.com/postcode/", gsub(" ", "", x[column],  fixed = TRUE)))
+postcode.in.england<-function(x, postcode.field='postcode'){
+  jsn = read_json(paste0("http://api.getthedata.com/postcode/", gsub(" ", "", x[postcode.field],  fixed = TRUE)))
   country = jsn$data$country
   if (class(country) == 'character'){
     return(country == 'England')
@@ -68,8 +66,8 @@ postcode.in.england<-function(x, column='Patient Postcode'){
   }
 }
 
-postcode.to.location2<-function(x){
-  B = gsub(" ", "", x['Patient Postcode'],  fixed = TRUE)
+postcode.to.location2<-function(x, postcode.field='postcode'){
+  B = gsub(" ", "", x[postcode.field],  fixed = TRUE)
   B = paste0("http://api.getthedata.com/postcode/", B)
   longitude = read_json(B)$data$longitude
   latitude = read_json(B)$data$latitude
