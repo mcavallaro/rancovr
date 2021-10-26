@@ -6,13 +6,13 @@ output:
     variant: markdown_github
 ---
 
-```{r eval=TRUE, include=TRUE}
+```{r eval=TRUE, include=FALSE}
 knitr::opts_knit$set(root.dir = "~/Documents/Rancovr")
 devtools::load_all(".")
 ```
 
 
-# Rancovr: Cluster detection with Random Neighbourhood Covering
+# Rancovr: Cluster detection in R with Random Neighbourhood Covering
 
 `rancovr` is a statistical software package written in R for the detection of disease clusters
 based on the  Random Neighbourhood Covering (RaNCover) of reference [1].
@@ -20,10 +20,11 @@ based on the  Random Neighbourhood Covering (RaNCover) of reference [1].
 or is consistent with a baseline of sporadic cases.
 
 
-<!-- ```{r eval=FALSE, include=TRUE} -->
-<!-- install.packages("devtools") -->
-<!-- devtools::install_github("mcavallaro/rancovr") -->
-<!-- ``` -->
+```{r eval=FALSE, include=TRUE}
+install.packages("devtools")
+devtools::install_github("mcavallaro/rancovr")
+```
+
 
 As a demonstration, we consider the spatio-temporal coordinates stored in `Data/synthetic_dataset.csv`,
 which represent records of infection cases and is obtained aggregating data simulated from an endemic component (`end.`) and
@@ -31,7 +32,7 @@ from an outbreak (`epi.`) in UK. See reference [1] for the simulation details.
 
 
 ```{r}
-case.df = read.csv(file='Data/synthetic_dataset.csv', sep = ',', stringsAsFactors = F)
+case.df = read.csv(file='data/synthetic_dataset.csv', sep = ',', stringsAsFactors = F)
 head(case.df)
 ```
 

@@ -1,10 +1,3 @@
-``` r
-knitr::opts_knit$set(root.dir = "~/Documents/Rancovr")
-devtools::load_all(".")
-```
-
-    ## Loading rancovr
-
 Rancovr: Cluster detection with Random Neighbourhood Covering
 =============================================================
 
@@ -98,26 +91,26 @@ cylinders = CreateCylinders(observation.matrix = observation.matrix,
 ```
 
     ## Evaluating cylinder exceedances from  01/01/15  to  24/11/16 .
-    ## Time difference of 0.9325681 secs
+    ## Time difference of 0.9150989 secs
 
 ``` r
 head(cylinders)
 ```
 
     ##            x        y       rho t.low t.upp n_obs        mu     p.val
-    ## 1 -46.992718 5977.970  6.421364    75    96    15 14.958127 0.5300511
-    ## 2  -2.441863 5694.662  7.414752    52    68     4  6.675765 0.8996866
-    ## 3 -43.553823 5923.809 11.723753    17    24     4  7.017125 0.9191229
-    ## 4 -41.212046 5939.494  9.081180    48    59     8 12.661917 0.9356838
-    ## 5 -44.571110 5980.230  5.987953    70    94    19 22.870920 0.8184250
-    ## 6  52.512579 5708.980 16.579890    16    20     1  2.732871 0.9349677
+    ## 1 -49.373833 5815.519  6.266787    40    62     4  5.077254 0.7456515
+    ## 2 -57.185556 5761.451  7.675215    62    77     3  1.914065 0.3000781
+    ## 3 -85.083930 5969.371 20.306710    37    40     5  4.993283 0.5583273
+    ## 4  -6.429285 5715.125  8.290180    87    99    13 14.390122 0.6788302
+    ## 5  -8.636248 5981.920  9.081437    11    22     8  8.255984 0.5821645
+    ## 6 -97.464274 5873.274  8.290180    16    29     2  0.000000 0.0000000
     ##   warning
     ## 1   FALSE
     ## 2   FALSE
     ## 3   FALSE
     ## 4   FALSE
     ## 5   FALSE
-    ## 6   FALSE
+    ## 6    TRUE
 
 Compute the warning score for each case:
 

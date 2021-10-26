@@ -1,11 +1,12 @@
 Package: rancovr
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Cluster detection in R with RAndom Neighbourhood COVeRing 
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Massimo Cavallaro
+Maintainer: Massimo Cavallaro <mcavallaro@warwick.ac.uk>
+Description: rancovr detects statio-temporal clusters against a baseline of sparse Poisson point events using
+the rnndom neighbourhood covering algorithm.
+URL: https://github.com/mcavallaro/rancovr
 License: MIT License
 Encoding: UTF-8
 LazyData: true
