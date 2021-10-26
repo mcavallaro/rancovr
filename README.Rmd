@@ -59,7 +59,7 @@ Create  100,000 cyclinders to cover the detected cases:
 ```{r}
 cylinders = CreateCylinders(observation.matrix = observation.matrix,
                             baseline.matrix = baseline.matrix,
-                            week.range = c(0,99), n.cylinders = 10000)
+                            week.range = c(0,99), n.cylinders = 1000)
 head(cylinders)
 ```
 

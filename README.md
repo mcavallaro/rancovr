@@ -5,8 +5,6 @@ devtools::load_all(".")
 
     ## Loading rancovr
 
-    ## Loading required package: readxl
-
 Rancovr: Cluster detection with Random Neighbourhood Covering
 =============================================================
 
@@ -50,26 +48,16 @@ time.factor = TimeFactor(case.df)
 ```
 
     ## Computing the temporal baseline.
-    ## Estimating parameters for temporal trend, step  1  of  20 .
-    Estimating parameters for temporal trend, step  2  of  20 .
-    Estimating parameters for temporal trend, step  3  of  20 .
-    Estimating parameters for temporal trend, step  4  of  20 .
-    Estimating parameters for temporal trend, step  5  of  20 .
-    Estimating parameters for temporal trend, step  6  of  20 .
-    Estimating parameters for temporal trend, step  7  of  20 .
-    Estimating parameters for temporal trend, step  8  of  20 .
-    Estimating parameters for temporal trend, step  9  of  20 .
-    Estimating parameters for temporal trend, step  10  of  20 .
-    Estimating parameters for temporal trend, step  11  of  20 .
-    Estimating parameters for temporal trend, step  12  of  20 .
-    Estimating parameters for temporal trend, step  13  of  20 .
-    Estimating parameters for temporal trend, step  14  of  20 .
-    Estimating parameters for temporal trend, step  15  of  20 .
-    Estimating parameters for temporal trend, step  16  of  20 .
-    Estimating parameters for temporal trend, step  17  of  20 .
-    Estimating parameters for temporal trend, step  18  of  20 .
-    Estimating parameters for temporal trend, step  19  of  20 .
-    Estimating parameters for temporal trend, step  20  of  20 .
+    ## Estimating parameters for temporal trend, step  1  of  10 .
+    Estimating parameters for temporal trend, step  2  of  10 .
+    Estimating parameters for temporal trend, step  3  of  10 .
+    Estimating parameters for temporal trend, step  4  of  10 .
+    Estimating parameters for temporal trend, step  5  of  10 .
+    Estimating parameters for temporal trend, step  6  of  10 .
+    Estimating parameters for temporal trend, step  7  of  10 .
+    Estimating parameters for temporal trend, step  8  of  10 .
+    Estimating parameters for temporal trend, step  9  of  10 .
+    Estimating parameters for temporal trend, step  10  of  10 .
     The variable `time.factor` has been saved on disk in file `/home/massimo/Documents/Rancovr/timefactor_tmp.Rdata`.
     ## Load on memory with `load("/home/massimo/Documents/Rancovr/timefactor_tmp.Rdata", verbose=1)`.
 
@@ -106,30 +94,30 @@ Create 100,000 cyclinders to cover the detected cases:
 ``` r
 cylinders = CreateCylinders(observation.matrix = observation.matrix,
                             baseline.matrix = baseline.matrix,
-                            week.range = c(0,99), n.cylinders = 10000)
+                            week.range = c(0,99), n.cylinders = 1000)
 ```
 
     ## Evaluating cylinder exceedances from  01/01/15  to  24/11/16 .
-    ## Time difference of 8.762002 secs
+    ## Time difference of 0.9325681 secs
 
 ``` r
 head(cylinders)
 ```
 
-    ##            x        y       rho t.low t.upp n_obs        mu        p.val
-    ## 1 -45.209364 5941.595 10.153335     3    12     8 11.580547 8.905045e-01
-    ## 2 -22.371419 5727.662  6.266774    10    32     7 10.003255 8.700637e-01
-    ## 3 -79.773025 5765.724  9.081419    86    97     2  1.728055 5.154168e-01
-    ## 4 -90.320547 6016.805  9.572656     2    12     4  2.894640 3.291779e-01
-    ## 5 -65.822044 5839.956 12.843066    11    17    21 21.507058 5.723841e-01
-    ## 6  -9.615046 5726.710  7.675200    80    95    30 10.956182 1.561523e-06
+    ##            x        y       rho t.low t.upp n_obs        mu     p.val
+    ## 1 -46.992718 5977.970  6.421364    75    96    15 14.958127 0.5300511
+    ## 2  -2.441863 5694.662  7.414752    52    68     4  6.675765 0.8996866
+    ## 3 -43.553823 5923.809 11.723753    17    24     4  7.017125 0.9191229
+    ## 4 -41.212046 5939.494  9.081180    48    59     8 12.661917 0.9356838
+    ## 5 -44.571110 5980.230  5.987953    70    94    19 22.870920 0.8184250
+    ## 6  52.512579 5708.980 16.579890    16    20     1  2.732871 0.9349677
     ##   warning
     ## 1   FALSE
     ## 2   FALSE
     ## 3   FALSE
     ## 4   FALSE
     ## 5   FALSE
-    ## 6    TRUE
+    ## 6   FALSE
 
 Compute the warning score for each case:
 
@@ -146,12 +134,12 @@ head(case.df)
     ## 5    0  B91 3GX 52.40486 -1.775618         17 5827.421 -59.17484
     ## 6    0  BH178AN 50.75126 -1.961944        128 5643.541 -73.64748
     ##   warning.score  sim
-    ## 1          0.00 end.
-    ## 2          0.00 end.
-    ## 3          0.12 end.
-    ## 4          0.00 end.
-    ## 5          0.00 end.
-    ## 6          0.00 end.
+    ## 1             0 end.
+    ## 2             0 end.
+    ## 3             0 end.
+    ## 4             0 end.
+    ## 5             0 end.
+    ## 6             0 end.
 
 Assess concordance with ROC-ACU
 
