@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Massimo Cavallaro
 Maintainer: Massimo Cavallaro <mcavallaro@warwick.ac.uk>
 Description: rancovr detects statio-temporal clusters against a baseline of sparse Poisson point events using
-the rnndom neighbourhood covering algorithm.
+    the random neighbourhood covering algorithm.
 URL: https://github.com/mcavallaro/rancovr
 License: MIT License
 Encoding: UTF-8
