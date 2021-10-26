@@ -6,10 +6,11 @@ output:
     variant: markdown_github
 ---
 
-```{r}
-knitr::opts_knit$set(root.dir = "~/rancovr")
-getwd()
+```{r eval=TRUE, include=TRUE}
+knitr::opts_knit$set(root.dir = "~/Documents/Rancovr")
+devtools::load_all(".")
 ```
+
 
 # Rancovr: Cluster detection with Random Neighbourhood Covering
 
@@ -19,14 +20,15 @@ based on the  Random Neighbourhood Covering (RaNCover) of reference [1].
 or is consistent with a baseline of sporadic cases.
 
 
-```{r include=TRUE}
-install.packages("devtools")
-devtools::install_github("mcavallaro/rancovr")
-```
+<!-- ```{r eval=FALSE, include=TRUE} -->
+<!-- install.packages("devtools") -->
+<!-- devtools::install_github("mcavallaro/rancovr") -->
+<!-- ``` -->
 
 As a demonstration, we consider the spatio-temporal coordinates stored in `Data/synthetic_dataset.csv`,
 which represent records of infection cases and is obtained aggregating data simulated from an endemic component (`end.`) and
 from an outbreak (`epi.`) in UK. See reference [1] for the simulation details.
+
 
 ```{r}
 case.df = read.csv(file='Data/synthetic_dataset.csv', sep = ',', stringsAsFactors = F)
@@ -45,7 +47,7 @@ baseline.matrix = CreateBaselineMatrix(case.df , save.on.dir = T)
 
 ```{r}
 load(file.path(getwd(), "observation_matrix_tmp.Rdata"), verbose=1)
-plot( time.factor, xlab = 'week', xaxt='n')
+plot(time.factor, xlab = 'week', xaxt='n')
 lines(colSums(baseline.matrix))
 lines(colSums(observation.matrix))
 axis(side=1, at=1:length(time.factor), labels = names(time.factor))
