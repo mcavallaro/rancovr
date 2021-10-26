@@ -1,10 +1,8 @@
 
 default.postcode.file = "Data/Postcode_Estimates_Table_with_coordinates2.csv"
 require(readxl)
-source("utils.R")
 
 ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
-  source("utils.R")
   case.df<-tryCatch({
     load(paste0(case.file, ".Rdata"))
     case.df
@@ -129,10 +127,7 @@ ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
     writeLines("There is no `baseline.matrix` to update, run first `ranScanCreateBaselineMatrix`.")
     return(0)
   }
-  source("time_utils.R")
-  
-  
-  
+
   time.factor = apply(observation.matrix, 3, sum)
   aggregated.process = expand.histogram(time.factor[-1]) # exclude the first entry (-1) with undated data
   Parameters =  cmle(aggregated.process, 50)
