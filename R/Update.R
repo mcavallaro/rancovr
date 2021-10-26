@@ -1,6 +1,5 @@
 
 default.postcode.file = "Data/Postcode_Estimates_Table_with_coordinates2.csv"
-require(readxl)
 
 ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
   case.df<-tryCatch({

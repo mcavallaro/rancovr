@@ -415,7 +415,7 @@ TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE, date.tim
   },
   error = function(e){
     cat("Computing the temporal baseline.\n")
-    Parameters = cmle(case.df[,date.time.field], 20, parameters)
+    Parameters = cmle(case.df[,date.time.field], 10, parameters)
     n.weeks = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) - min(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) + 1
     x = 0:n.weeks
     prediction.cmle = predict.cmle(x, Parameters)
