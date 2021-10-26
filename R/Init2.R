@@ -92,7 +92,6 @@
 #     )
 # }
 # 
-# ranScanInit<-Init
 
 Clean<-function(pattern){
   list_files = list.files('Data',pattern = paste0(pattern, '.Rdata'))
@@ -148,7 +147,7 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
 
 #' CreateObservationMatrices_<-function(case.file, emmtypes, starting.week, n.weeks){
 #'   #' This function rearranges the observation of `case.file` into observation Matrices
-#'   #' similarly to `ranScanCreateObservationMatrices` with the difference that a) it
+#'   #' similarly to `CreateObservationMatrices` with the difference that a) it
 #'   #' creates matrices for each week starting from `starting.week` until the last week in the dataset
 #'   #'  and b) it counts the cases that are not typed at "SAMPLE_DT" but only are at "RECEIPT_DT" datetimes.
 #'   #' It creates and saves in two `.Rdata` files:
@@ -172,14 +171,14 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
 #'   #' @param starting.week integer. This is the week corresponding to the last columns of observation and baseline matrices.
 #'   #' @param n.weeks no. columns of each matrix
 #'   #' @examples
-#'   #' ranScanCreateObservationMatrices_(case.file = "Data/Full MOLIS dataset minus PII 20200918.xlsx", c('1.0', '12.0'), , )
+#'   #' CreateObservationMatrices_(case.file = "Data/Full MOLIS dataset minus PII 20200918.xlsx", c('1.0', '12.0'), , )
 #'   # emmtype is an vector of strings, e.g., 
 #'   case.df<-tryCatch({
 #'     load(paste0(case.file, ".Rdata"))
 #'     case.df
 #'   },
 #'   error = function(e){
-#'     case.df = ranScanInit(case.file)
+#'     case.df = Init(case.file)
 #'     return(case.df)
 #'   }
 #'   )
@@ -268,14 +267,11 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
 #' }
 
 
-# ranScanCreateObservationMatrices_<-CreateObservationMatrices_
-# ranScanCreateObservationMatrices.delay<-ranScanCreateObservationMatrices_
-
-#' ranScanCreateObservationMatrices.prospective<-function(case.file, emmtypes, n.weeks){
-#'   #' This is a simplified version of `ranScanCreateObservationMatrices.delay` that
+#' CreateObservationMatrices.prospective<-function(case.file, emmtypes, n.weeks){
+#'   #' This is a simplified version of `CreateObservationMatrices.delay` that
 #'   #' create a sparse observation matrix only for the last (current) week.
 #'   #' This function rearranges the observation of `case.file` into observation Matrices
-#'   #' similarly to `ranScanCreateObservationMatrices` with the difference that it counts the cases that are not typed at "SAMPLE_DT" but only are at "RECEIPT_DT" datetimes.
+#'   #' similarly to `CreateObservationMatrices` with the difference that it counts the cases that are not typed at "SAMPLE_DT" but only are at "RECEIPT_DT" datetimes.
 #'   #' It creates and saves in two `.Rdata` files:
 #'   #'  1) a matrix that contains the observations of untyped case.
 #'   #'  2) a list of matrices that contain the observations of the typed cases (one, for each emm type).
@@ -286,7 +282,7 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
 #'   #' @param emmtypes An vector of emmtypes.
 #'   #' @param n.weeks no. columns
 #'   #' @examples
-#'   #' ranScanCreateObservationMatrices.prospective(case.file = "Data/Full MOLIS dataset minus PII 20200918.xlsx", c('1.0', '12.0'), 100)
+#'   #' CreateObservationMatrices.prospective(case.file = "Data/Full MOLIS dataset minus PII 20200918.xlsx", c('1.0', '12.0'), 100)
 #'   library(Matrix)
 #'   # emmtype is an vector of strings, e.g., 
 #'   case.df<-tryCatch({
@@ -294,7 +290,7 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
 #'     case.df
 #'   },
 #'   error = function(e){
-#'     case.df = ranScanInit(case.file)
+#'     case.df = Init(case.file)
 #'     return(case.df)
 #'   }
 #'   )
@@ -367,42 +363,39 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
 #' 
 #' 
 
-PostcodeMap<-function(observation.matrix,
-                      postcode.file.name=file.path(getwd(),
-                                                   "Data/UK_population_per_postcode_with_coordinates.csv"),
-                      postcode.field = 'postcode'){
+PostcodeMap<-function(matrix){
   # Create a dataframe that maps postcodes to coordinates
-  writeLines("Compiling the table that maps the rows of the observation matrix to geo-coordinates and population.")
+  # `matrix` can be either an baseline.matrix or an baseline.matrix
+  postcode.field = 'postcode'
+  writeLines("Compiling the table that maps the rows of the observation/baseline matrix to geo-coordinates and population.")
   ret<-tryCatch({
-    load("Data/postcode2coord.Rdata", verbose = 1)
+    load("postcode2coord.Rdata", verbose = 1)
     if (all(as.character(postcode2coord[, postcode.field]) == rownames(observation.matrix))){
-      writeLines("Using data loaded from `Data/postcode2coord.Rdata`")
+      writeLines("Using data loaded from `postcode2coord.Rdata`")
       postcode2coord
     }else{
-      writeLines("Data loaded from `Data/postcode2coord.Rdata` is for a different matrix and will be overwritten by the map for the current matrix.")
+      writeLines("Data loaded from `postcode2coord.Rdata` is for a different matrix and will be overwritten by the map for the current matrix.")
       stop() #raise error
     }
   },
   error = function(e){
-    postcode2coord = data.frame(postcode.field = rownames(observation.matrix))
+    postcode2coord = data.frame(postcode.field = rownames(matrix))
     names(postcode2coord) = postcode.field
     # Insert coordinates and population density
-    postcode.data = read.table(postcode.file.name, header=T, stringsAsFactors = F, sep=',', check.names=F)
-    postcode.data[,postcode.field] = c(sapply(postcode.data[,postcode.field],
-                                                 function(x){gsub(" ", "", toupper(x),  fixed = TRUE)}))
+    
+    # postcode.data = 
+    
     postcode2coord[,c("latitude", "longitude", "Total")] = t(apply(postcode2coord, 1,
                                                                    postcode.to.location.and.population,
                                                                    postcode.data))
     save.and.tell('postcode2coord', file=file.path(getwd(),
-                                                   paste0("Data/postcode2coord.Rdata")))
+                                                   paste0("postcode2coord_tmp.Rdata")))
 
     return(postcode2coord)
   }
   )
   return(ret)
 }
-
-# ranScanPostcodeMap<-PostcodeMap
 
 TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE, date.time.field = "week", parameters = NULL){
   time.factor<-tryCatch({
@@ -469,7 +462,6 @@ EmmtypeFactor.tau<-function(case.file, emmtypes, date.time.field = 'SAMPLE_DT_nu
   return(xy.list)
 }
 
-# ranScanEmmtypeFactor.tau<-EmmtypeFactor.tau
 
 #' At a given week, a fraction lambda_untyped \approx 0.6 of all cases are not typed.
 #' the baselines e.g. are as follows:

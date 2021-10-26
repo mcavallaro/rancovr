@@ -1,8 +1,4 @@
 
-source("R/utils.R")
-source("R/surveillance_utils.R")
-source("R/plot_utils.R")
-
 #load('Data/postcode2coord.Rdata')
 # UK range (latitude and longitude)
 #Y.range = range(postcode2coord[!is.na(postcode2coord$latitude),]$latitude) + c(-2,2) * var(postcode2coord[!is.na(postcode2coord$latitude),]$latitude)
@@ -79,8 +75,6 @@ CreateCylinders<-function(observation.matrix, baseline.matrix,
   return(cylinders)
 }
 
-ranScanCreateCylinders<-CreateCylinders
-
 
 #' 
 #' n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders
@@ -153,8 +147,6 @@ CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
   return(cylinders)
 }
 
-ranScanCreateCylinders.delay<-CreateCylinders.delay
-
 
 PlotCylindersCI<-function(cylinders, confidence.level=0.68, title=NULL){
   plot(n_obs.typed ~ mu.typed, cylinders, title=title, xlab = 'Expected cases', ylab = 'Observed cases', pch=20, cex=0.8)
@@ -167,14 +159,10 @@ PlotCylindersCI<-function(cylinders, confidence.level=0.68, title=NULL){
   points(cylinders[cylinders$warning,]$mu.typed, cylinders[cylinders$warning,]$n_obs.typed, col='red', pch=20, cex=0.9)
 }
 
-ranScanPlotCylindersCI<-PlotCylindersCI
-
 SaveCylinders<-function(cylinders, file.basename){
   write.csv(cylinders, paste0(file.basename,'.csv'), quote = F, row.names = F)
   save.and.tell("cylinders", file = paste0(file.basename,'.Rdata'))
 }
-
-ranScanSaveCylinders<-SaveCylinders
 
 Evaluate<-function(case.file, cylinders, emmtype, p.val.threshold = 0.05,
                           warning.score.name = 'warning.score', date.time.field = 'SAMPLE_DT_numeric'){
@@ -183,7 +171,7 @@ Evaluate<-function(case.file, cylinders, emmtype, p.val.threshold = 0.05,
     case.df
   },
   error = function(e){
-    case.df = ranScanInit(case.file)
+    case.df = Init(case.file)
     return(case.df$case.df)
   })
   if (!('x' %in% names(case.df) & ('y' %in% names(case.df)))){
@@ -202,8 +190,6 @@ Evaluate<-function(case.file, cylinders, emmtype, p.val.threshold = 0.05,
   return(case.df)
 }
 
-ranScanEvaluate<-Evaluate
-
 plotBaseline<-function(week, emmtype, z, add=F, tf=factor, emmf=emmtype.factor){
   xmax=max(z$fhat) * tf[week] * emmf[emmtype][[1]]
   ColorRamp=colorRampPalette(c("white", blues9))(100)
@@ -213,7 +199,7 @@ plotBaseline<-function(week, emmtype, z, add=F, tf=factor, emmf=emmtype.factor){
         col=ColorRamp_ex, add = add, axes=F, xlab=NA, ylab=NA)
 }
 
-# ranScanMovie<-function(cylinders, observation.matrix, postcode2coord, output.basename, emmtype){
+# Movie<-function(cylinders, observation.matrix, postcode2coord, output.basename, emmtype){
 #   idx = rownames(observation.matrix) != 'NA'
 #   observation.matrix = observation.matrix[idx,]
 #   idx = rownames(postcode2coord) != 'NA'
@@ -248,7 +234,7 @@ plotBaseline<-function(week, emmtype, z, add=F, tf=factor, emmf=emmtype.factor){
 # }
 
 
-# ranScanPlotCluster<-function(observation.matrix, postcode2coord.km, main=''){
+# PlotCluster<-function(observation.matrix, postcode2coord.km, main=''){
 #   library(tsne)
 #   idx = rownames(observation.matrix) != 'NA'
 #   observation.matrix = observation.matrix[idx,]
@@ -298,8 +284,6 @@ Cluster<-function(case.df, emmtype, makeplot=FALSE, warning.score='warning.score
   return(X)
 }
 
-ranScanCluster<-Cluster
-
 PlotCluster0<-function(X, case.df, emmtype, warning.score='warning.score', legend.pos="bottomleft", ...){
   threshold = 0.95
   idx = ((case.df$emmtype == emmtype) & !is.na(case.df$x))
@@ -326,8 +310,6 @@ PlotCluster0<-function(X, case.df, emmtype, warning.score='warning.score', legen
   axis(side = 4)
   mtext("warning score", side = 4, line = 2)
 }
-
-ranScanPlotCluster0<-PlotCluster0
 
 PlotCluster<-function(X, case.df, emmtype, warning.score='warning.score', threshold=NULL, legend.pos="bottomleft", ...){
   if (is.null(threshold)){
@@ -360,9 +342,6 @@ PlotCluster<-function(X, case.df, emmtype, warning.score='warning.score', thresh
 #    mtext("time [week]", side = 4, line = 2)
   }
 }
-
-ranScanPlotCluster<-PlotCluster
-
 
 PlotCluster3<-function(X, case.df, emmtype,
                               warning.score='warning.score',
@@ -424,6 +403,4 @@ PlotCluster3<-function(X, case.df, emmtype,
            cex=0.7
            )
 }
-
-ranScanPlotCluster3<-PlotCluster3
 

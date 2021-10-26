@@ -196,7 +196,3 @@ Simulate<-function(population, time.factor, total.average){
   return(simulation)
 }
 
-
-
-ranScanSimulate<-Simulate
-

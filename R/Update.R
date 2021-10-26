@@ -1,7 +1,7 @@
 
 default.postcode.file = "Data/Postcode_Estimates_Table_with_coordinates2.csv"
 
-ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
+Update<-function(case.file, postcode.file=default.postcode.file){
   case.df<-tryCatch({
     load(paste0(case.file, ".Rdata"))
     case.df
@@ -9,7 +9,7 @@ ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
   error = function(e){return(NULL)}
   )
   if(is.null(case.df)){
-    writeLines("There is no `case.df` to update, run first `ranScanInit`")
+    writeLines("There is no `case.df` to update, run first `Init`")
     return(0)
   }
   
@@ -71,7 +71,7 @@ ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
   }
   )
   if(is.null(observation.matrix)){
-    writeLines("There is no `observation.matrix` to update, run first `ranScanCreateObservationMatrix`.")
+    writeLines("There is no `observation.matrix` to update, run first `CreateObservationMatrix`.")
     return(0)
   }
   
@@ -93,8 +93,7 @@ ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
                              dimnames=list(c(postcodes, new.postcodes), c(emmtypes, new.emmtypes), c('NA', as.character(0:(n.weeks+new.n.weeks)))))
   
   # the dimensions correspond to postcode, emmtype, time  
-  
-  
+
   # copy the data from the old matrix
   observation.matrix.new[1:n.postcodes, 1:n.emmtypes, 1:(n.weeks+2)] = observation.matrix
   observation.matrix = observation.matrix.new
@@ -111,8 +110,6 @@ ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
   save("observation.matrix", file=paste0(case.file, 'obs.Rata'))
   return(observation.matrix)
 
-  
-  
   # UPDADE THE baseline.matrix
   baseline.matrix<-tryCatch({
     load(paste0(case.file, "bas.Rdata"))
@@ -123,7 +120,7 @@ ranScanUpdate<-function(case.file, postcode.file=default.postcode.file){
   }
   )
   if(is.null(baseline.matrix)){
-    writeLines("There is no `baseline.matrix` to update, run first `ranScanCreateBaselineMatrix`.")
+    writeLines("There is no `baseline.matrix` to update, run first `CreateBaselineMatrix`.")
     return(0)
   }
 

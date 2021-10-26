@@ -28,7 +28,7 @@ devtools::install_github("mcavallaro/rancovr")
 
 As a demonstration, we consider the spatio-temporal coordinates stored in `Data/synthetic_dataset.csv`,
 which represent records of infection cases and is obtained aggregating data simulated from an endemic component (`end.`) and
-from an outbreak (`epi.`) in UK. See reference [1] for the simulation details.
+from an outbreak (`epi.`) in the UK. See reference [1] for the simulation details.
 
 
 ```{r eval=FALSE, include=TRUE}
@@ -54,10 +54,11 @@ baseline.matrix = CreateBaselineMatrix(case.df , save.on.dir = T)
 
 ```{r}
 load(file.path(getwd(), "observation_matrix_tmp.Rdata"), verbose=1)
-plot(time.factor, xlab = 'week', xaxt='n')
+plot(time.factor, xlab = 'Week', ylab='Number of cases', xaxt='n')
 lines(colSums(baseline.matrix))
 lines(colSums(observation.matrix))
 axis(side=1, at=1:length(time.factor), labels = names(time.factor))
+legend('bottomright',legend=c('Baseline', 'Observations'), pch=c(1, NA), lty=c(1,1))
 ```
 
 
