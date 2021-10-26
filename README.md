@@ -1,16 +1,20 @@
-Rancovr: Cluster detection with Random Neighbourhood Covering
-=============================================================
+Rancovr: Cluster detection in R with Random Neighbourhood Covering
+==================================================================
 
 `rancovr` is a statistical software package written in R for the detection of disease clusters based on the Random Neighbourhood Covering (RaNCover) of reference \[1\]. `rancovr` assess whether a single recorded infection is part of a disease cluster (such that caused by a local outbreak) or is consistent with a baseline of sporadic cases.
 
-<!-- ```{r eval=FALSE, include=TRUE} -->
-<!-- install.packages("devtools") -->
-<!-- devtools::install_github("mcavallaro/rancovr") -->
-<!-- ``` -->
+``` r
+install.packages("devtools")
+devtools::install_github("mcavallaro/rancovr")
+```
+
 As a demonstration, we consider the spatio-temporal coordinates stored in `Data/synthetic_dataset.csv`, which represent records of infection cases and is obtained aggregating data simulated from an endemic component (`end.`) and from an outbreak (`epi.`) in UK. See reference \[1\] for the simulation details.
 
 ``` r
-case.df = read.csv(file='Data/synthetic_dataset.csv', sep = ',', stringsAsFactors = F)
+case.df = read.csv(file=system.file('extdata', 'synthetic_dataset.csv' , package='rancovr'), sep = ',', stringsAsFactors = F)
+```
+
+``` r
 head(case.df)
 ```
 
@@ -80,7 +84,7 @@ lines(colSums(observation.matrix))
 axis(side=1, at=1:length(time.factor), labels = names(time.factor))
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 Create 100,000 cyclinders to cover the detected cases:
 
@@ -91,25 +95,25 @@ cylinders = CreateCylinders(observation.matrix = observation.matrix,
 ```
 
     ## Evaluating cylinder exceedances from  01/01/15  to  24/11/16 .
-    ## Time difference of 0.9150989 secs
+    ## Time difference of 1.047464 secs
 
 ``` r
 head(cylinders)
 ```
 
-    ##            x        y       rho t.low t.upp n_obs        mu     p.val
-    ## 1 -49.373833 5815.519  6.266787    40    62     4  5.077254 0.7456515
-    ## 2 -57.185556 5761.451  7.675215    62    77     3  1.914065 0.3000781
-    ## 3 -85.083930 5969.371 20.306710    37    40     5  4.993283 0.5583273
-    ## 4  -6.429285 5715.125  8.290180    87    99    13 14.390122 0.6788302
-    ## 5  -8.636248 5981.920  9.081437    11    22     8  8.255984 0.5821645
-    ## 6 -97.464274 5873.274  8.290180    16    29     2  0.000000 0.0000000
+    ##           x        y       rho t.low t.upp n_obs         mu       p.val
+    ## 1 -50.60803 5977.949 10.854219     9    17    20 20.4310316 0.567569137
+    ## 2 -68.62424 5838.785 14.358782     9    14    19 19.8256198 0.603735837
+    ## 3 -33.63420 5885.141  6.266686    73    95     8  5.6532285 0.209814056
+    ## 4 -15.92438 5882.221 14.358782    86    91     2  0.5049572 0.091711064
+    ## 5 -53.13067 5970.904  8.290047    71    84    16  6.4240855 0.001030094
+    ## 6 -12.62977 5732.624  6.421442    63    84    35 25.2947220 0.038793906
     ##   warning
     ## 1   FALSE
     ## 2   FALSE
     ## 3   FALSE
     ## 4   FALSE
-    ## 5   FALSE
+    ## 5    TRUE
     ## 6    TRUE
 
 Compute the warning score for each case:
@@ -127,12 +131,12 @@ head(case.df)
     ## 5    0  B91 3GX 52.40486 -1.775618         17 5827.421 -59.17484
     ## 6    0  BH178AN 50.75126 -1.961944        128 5643.541 -73.64748
     ##   warning.score  sim
-    ## 1             0 end.
-    ## 2             0 end.
-    ## 3             0 end.
-    ## 4             0 end.
-    ## 5             0 end.
-    ## 6             0 end.
+    ## 1           0.0 end.
+    ## 2           0.0 end.
+    ## 3           0.0 end.
+    ## 4           0.0 end.
+    ## 5           0.0 end.
+    ## 6           0.5 end.
 
 Assess concordance with ROC-ACU
 
@@ -161,6 +165,6 @@ ROC = roc(ifelse(case.df$sim == 'end.', FALSE, TRUE), case.df$warning.score)
 plot(ROC)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 \[1\] M. Cavallaro, J. Coelho, D. Ready, V. Decraene, T. Lamagni, N. D. McCarthy, D. Todkill, M. J. Keeling, Cluster detection with random neighbourhood covering: application to invasive Group A Streptococcal disease, 2021

@@ -31,11 +31,17 @@ which represent records of infection cases and is obtained aggregating data simu
 from an outbreak (`epi.`) in UK. See reference [1] for the simulation details.
 
 
-```{r}
-case.df = read.csv(file='data/synthetic_dataset.csv', sep = ',', stringsAsFactors = F)
-head(case.df)
+```{r eval=FALSE, include=TRUE}
+case.df = read.csv(file=system.file('extdata', 'synthetic_dataset.csv' , package='rancovr'), sep = ',', stringsAsFactors = F)
 ```
 
+```{r eval=TRUE, include=FALSE}
+case.df = read.csv(file='inst/extdata/synthetic_dataset.csv', sep = ',', stringsAsFactors = F)
+```
+
+```{r}
+head(case.df)
+```
 
 ```{r}
 CreateObservationMatrices(case.df)
