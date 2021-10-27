@@ -7,10 +7,9 @@ output:
 ---
 
 ```{r eval=TRUE, include=FALSE}
-knitr::opts_knit$set(root.dir = "~/Documents/Rancovr")
+knitr::opts_knit$set(root.dir = "~/Documents/rancovr")
 devtools::load_all(".")
 ```
-
 
 # Rancovr: Cluster detection in R with Random Neighbourhood Covering
 
@@ -48,7 +47,7 @@ CreateObservationMatrices(case.df)
 ```
 
 ```{r}
-time.factor = TimeFactor(case.df)
+time.factor = TimeFactor(case.df, n.iterations=5)
 baseline.matrix = CreateBaselineMatrix(case.df , save.on.dir = T)
 ```
 
