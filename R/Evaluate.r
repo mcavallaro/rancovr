@@ -23,8 +23,9 @@ CreateCylinders<-function(observation.matrix, baseline.matrix,
                           p.val.threshold=0.05,
                           size_factor=1){
   
-  load("~/Documents/Rancovr/Data/postcode2coord.Rdata")  
-  coord.df=postcode2coord
+  # load("~/Documents/Rancovr/Data/postcode2coord.Rdata")  
+  coord.df=PostcodeMap(observation.matrix)
+  #postcode2coord
   
   observation.matrix = observation.matrix[!(rownames(observation.matrix) == 'NA'),]
   baseline.matrix = baseline.matrix[!(rownames(baseline.matrix) == 'NA'),]

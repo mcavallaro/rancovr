@@ -23,9 +23,6 @@ plot_cases<-function(observation.matrix, week.range, postcode.locations, col='#f
   points(case_locations$longitude, case_locations$latitude, col=col, pch=pch, cex=cex)
 }
 
-
-
-
 plot_cylinders<-function(cylinders, color="#3182bd99",lwd=0.1){ #'#ffebeb88'
   for(i in 1:nrow(cylinders)){
     plot.owin(disc(cylinders$rho[i], c(cylinders$x[i],cylinders$y[i])), add=TRUE, col=NA, lwd=lwd, border=color)
@@ -148,8 +145,6 @@ plot.strategy.compare<-function(n.rows, prospective.w.df1, prospective.w.df2,
     }
   }
 }
-
-
 
 plot.delay.compare<-function(n.rows, prospective.w.df1, delay.w.df2,
                                 col1, col2, 

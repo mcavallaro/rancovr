@@ -1,9 +1,3 @@
-
-
-
-
-
-# 
 # Init<-function(case.file){ #}, postcode.file=default.postcode.file){
 #     source("utils.R")
 #     case.df<-tryCatch({
@@ -13,6 +7,7 @@
 #     },
 #     error = function(e){
 #       ""
+
 #       case.df = read_excel(case.file)
 #       case.df = as.data.frame(case.df)
 #       nomi = c("FULLNO", "Patient Postcode", "SAMPLE_DT", "RECEPT_DT", "Isolation Site Decoded", "Sterile Site Y N",
@@ -369,12 +364,12 @@ PostcodeMap<-function(matrix){
   postcode.field = 'postcode'
   writeLines("Compiling the table that maps the rows of the observation/baseline matrix to geo-coordinates and population.")
   ret<-tryCatch({
-    load("postcode2coord.Rdata", verbose = 1)
+    load("postcode2coord_tmp.Rdata", verbose = 1)
     if (all(as.character(postcode2coord[, postcode.field]) == rownames(observation.matrix))){
-      writeLines("Using data loaded from `postcode2coord.Rdata`")
+      writeLines("Using data loaded from `postcode2coord_tmp.Rdata`")
       postcode2coord
     }else{
-      writeLines("Data loaded from `postcode2coord.Rdata` is for a different matrix and will be overwritten by the map for the current matrix.")
+      writeLines("Data loaded from `postcode2coord_tmp.Rdata` is for a different matrix and will be overwritten by the map for the current matrix.")
       stop() #raise error
     }
   },
@@ -397,7 +392,8 @@ PostcodeMap<-function(matrix){
   return(ret)
 }
 
-TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE, date.time.field = "week", parameters = NULL){
+TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
+                     date.time.field = "week", parameters = NULL, n.iterations=20){
   time.factor<-tryCatch({
     if(get.from.dir == FALSE){
       stop("Not loading from local directory.")
@@ -408,7 +404,7 @@ TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE, date.tim
   },
   error = function(e){
     cat("Computing the temporal baseline.\n")
-    Parameters = cmle(case.df[,date.time.field], 10, parameters)
+    Parameters = cmle(case.df[,date.time.field], n.iterations, parameters)
     n.weeks = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) - min(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) + 1
     x = 0:n.weeks
     prediction.cmle = predict.cmle(x, Parameters)
