@@ -167,3 +167,4 @@ plot(ROC)
 McCarthy, D. Todkill, M. J. Keeling, Cluster detection with random
 neighbourhood covering: application to invasive Group A Streptococcal
 disease, 2021
+medRxiv 2021.10.20.21264984; doi: https://doi.org/10.1101/2021.10.20.21264984
