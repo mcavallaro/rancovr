@@ -88,15 +88,34 @@
 # }
 # 
 
-Clean<-function(pattern){
-  list_files = list.files('Data',pattern = paste0(pattern, '.Rdata'))
+#' Delete all \code{.RData} files with given basename.
+#' Can be used to clean the saved observation and baseline matrices.
+#' Use with caution.
+#' 
+#' @param basename A string.
+#' @return None
+#' @examples
+#' Clean('33.0_observation_matrix_tmp')
+#' Clean('observation_matrix_tmp')
+Clean<-function(basename){
+  list_files = list.files('Data',pattern = paste0(basename, '.Rdata'))
   for (file in list_files){
     file.remove(file.path("Data", file))
   }
 }
 
+#' Compute and save on disk 2D Sparse matrices containing the observations recorded in \code{case.df} for each type.
+#' 
+#' @param case.df A data frame.
+#' @param types A vector of strings.
+#' @param date.time.field A string.
+#' @param date.time.field A string.
+#' @param postcode.field A string.
+#' @return None
+#' @examples
+#' CreateObservationMatrices(case.df)
+#' CreateObservationMatrices(case.df, types=c('1.0', '33.0'), date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')
 CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week', postcode.field = 'postcode'){
-  # emmtype is an vector of strings, e.g., 
   postcodes = unique(case.df[,postcode.field])
   n.postcodes= length(postcodes)
   if (is.na(types)){
@@ -135,8 +154,13 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
     attribute_list$date.time.field = date.time.field
     attributes(observation.matrix) <- attribute_list
     
-    save.and.tell("observation.matrix",
-                  file=file.path(getwd(), paste0('observation_matrix_tmp.Rdata')))
+    if (!is.na(types)){
+      save.and.tell("observation.matrix",
+                  file = file.path(getwd(), paste0(type, '_observation_matrix_tmp.Rdata')))
+    }else{
+      save.and.tell("observation.matrix",
+                  file = file.path(getwd(), 'observation_matrix_tmp.Rdata'))
+    }
   }
 }
 
@@ -358,9 +382,15 @@ CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week',
 #' 
 #' 
 
+
+#' Returns a dataframe that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
+#' \code{matrix} can be baseline.matrix or an observation.matrix.
+#' 
+#' @param matrix A matrix or sparse matrix.
+#' @return A data frame.
+#' @examples
+#' postcode2coord = PostcodeMap(observation.matrix)
 PostcodeMap<-function(matrix){
-  # Create a dataframe that maps postcodes to coordinates
-  # `matrix` can be either an baseline.matrix or an baseline.matrix
   postcode.field = 'postcode'
   writeLines("Compiling the table that maps the rows of the observation/baseline matrix to geo-coordinates and population.")
   ret<-tryCatch({
@@ -392,6 +422,17 @@ PostcodeMap<-function(matrix){
   return(ret)
 }
 
+#' Returns a vector represententing the temporal component of the baseline.
+#' 
+#' @param case.df A data.frame
+#' @param save.on.dir A logical
+#' @param get.from.dir logical
+#' @param date.time.field A string
+#' @param parameters
+#' @param n.iterations An integer
+#' @return A vector
+#' @examples
+#' time.factor = TimeFactor(case.df)
 TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
                      date.time.field = "week", parameters = NULL, n.iterations=20){
   time.factor<-tryCatch({
@@ -498,6 +539,16 @@ EmmtypeFactor.delay_<-function(case.file, starting.week, n.weeks){
 }
 
 
+#' Compute and save on disk a 2D dense matrix containing the spatial component of the
+#' baseline.
+#' 
+#' @param case.df A data frame.
+#' @param date.time.field A string.
+#' @param postcode.field A string.
+#' @return A matrix
+#' @examples
+#' baseline.matrix = CreateBaselineMatrix(case.df)
+#' baseline.matrix = CreateBaselineMatrix(case.df, date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')
 CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
                                date.time.field='week', postcode.field='postcode'){
   
