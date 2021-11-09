@@ -16,11 +16,11 @@ TimeFactor(
 \arguments{
 \item{case.df}{A data.frame}
 
-\item{save.on.dir}{A logical}
+\item{save.on.dir}{logical. If TRUE then the vector is saved in `timefactor_tmp.Rdata` file.}
 
-\item{get.from.dir}{logical}
+\item{get.from.dir}{logical. If TRUE then the vector is obtained from the `timefactor_tmp.Rdata` file.}
 
-\item{date.time.field}{A string}
+\item{date.time.field}{A character string.}
 
 \item{n.iterations}{An integer}
 }

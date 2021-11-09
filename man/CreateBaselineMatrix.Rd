@@ -2,8 +2,7 @@
 % Please edit documentation in R/Init2.R
 \name{CreateBaselineMatrix}
 \alias{CreateBaselineMatrix}
-\title{Compute and save on disk a 2D dense matrix containing the spatial component of the
-baseline.}
+\title{Create and save a baseline matrix}
 \usage{
 CreateBaselineMatrix(
   case.df,
@@ -13,11 +12,11 @@ CreateBaselineMatrix(
 )
 }
 \arguments{
-\item{case.df}{A data frame.}
+\item{case.df}{A \code{data.frame}.}
 
-\item{date.time.field}{A string.}
+\item{date.time.field}{A character string.}
 
-\item{postcode.field}{A string.}
+\item{postcode.field}{A character string.}
 }
 \value{
 A matrix

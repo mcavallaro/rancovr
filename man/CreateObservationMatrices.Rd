@@ -6,19 +6,19 @@
 \usage{
 CreateObservationMatrices(
   case.df,
-  types = NA,
+  types = NULL,
   date.time.field = "week",
   postcode.field = "postcode"
 )
 }
 \arguments{
-\item{case.df}{A data frame.}
+\item{case.df}{A \code{data.frame}.}
 
-\item{types}{A vector of strings.}
+\item{types}{NULL or a character vector.}
 
-\item{date.time.field}{A string.}
+\item{date.time.field}{A character string.}
 
-\item{postcode.field}{A string.}
+\item{postcode.field}{A character string.}
 }
 \value{
 None

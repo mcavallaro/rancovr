@@ -1,3 +1,4 @@
+
 # Init<-function(case.file){ #}, postcode.file=default.postcode.file){
 #     source("utils.R")
 #     case.df<-tryCatch({
@@ -106,19 +107,19 @@ Clean<-function(basename){
 
 #' Compute and save on disk 2D Sparse matrices containing the observations recorded in \code{case.df} for each type.
 #' 
-#' @param case.df A data frame.
-#' @param types A vector of strings.
-#' @param date.time.field A string.
-#' @param date.time.field A string.
-#' @param postcode.field A string.
+#' @param case.df A \code{data.frame}.
+#' @param types NULL or a character vector.
+#' @param date.time.field A character string.
+#' @param date.time.field A character string.
+#' @param postcode.field A character string.
 #' @return None
 #' @examples
 #' CreateObservationMatrices(case.df)
 #' CreateObservationMatrices(case.df, types=c('1.0', '33.0'), date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')
-CreateObservationMatrices<-function(case.df, types=NA, date.time.field = 'week', postcode.field = 'postcode'){
+CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week', postcode.field = 'postcode'){
   postcodes = unique(case.df[,postcode.field])
   n.postcodes= length(postcodes)
-  if (is.na(types)){
+  if (is.null(types)){
     n.types = 1
   }else{
     n.types = length(emmtypes)
@@ -425,9 +426,9 @@ PostcodeMap<-function(matrix){
 #' Returns a vector represententing the temporal component of the baseline.
 #' 
 #' @param case.df A data.frame
-#' @param save.on.dir A logical
-#' @param get.from.dir logical
-#' @param date.time.field A string
+#' @param save.on.dir logical. If TRUE then the vector is saved in `timefactor_tmp.Rdata` file.
+#' @param get.from.dir logical. If TRUE then the vector is obtained from the `timefactor_tmp.Rdata` file.
+#' @param date.time.field A character string.
 #' @param parameters
 #' @param n.iterations An integer
 #' @return A vector
@@ -538,13 +539,14 @@ EmmtypeFactor.delay_<-function(case.file, starting.week, n.weeks){
   return(tmp)
 }
 
-
+#' Create and save a baseline matrix
+#'
 #' Compute and save on disk a 2D dense matrix containing the spatial component of the
 #' baseline.
 #' 
-#' @param case.df A data frame.
-#' @param date.time.field A string.
-#' @param postcode.field A string.
+#' @param case.df A \code{data.frame}.
+#' @param date.time.field A character string.
+#' @param postcode.field A character string.
 #' @return A matrix
 #' @examples
 #' baseline.matrix = CreateBaselineMatrix(case.df)
