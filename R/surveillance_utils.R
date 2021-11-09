@@ -1,4 +1,4 @@
-library(truncnorm)
+#library(truncnorm)
 
 f_radia_and_heights<-function(baseline.matrix, weeks=1:100){
   # this function compute the optimal radia and no. of weeks, such that the
@@ -69,13 +69,21 @@ rcylinder2<-function(n.cylinders, observation.matrix, week.range, radia_and_heig
 }
 
 
-
+#' rcylinders
+#' 
+#' Compute random cylinder coordinates.
+#' 
+#' @param n integer. number of cylinder samples.
+#' @param X.range numeric.
+#' @param Y.range numeric.
+#' @param time.range numeric
+#' @param border NULL or numeric. It is the distance from the boundary.
+#' @param rs numeric. It is a reference size. 
+#' @importFrom truncnorm rtruncnorm
+#' @return A \code(data.frame).
+#' @examples
+#' cylinders=rcylinder(10, c(-2,3), c(-10,10)), c(1, 100) )
 rcylinder<-function(n,  X.range, Y.range, time.range, border=NULL, rs=0.5, a=0){
-  # n is the number of samples
-  # times
-  # border is the distance from the boundary
-  # rs is a reference size 
-  
   X.min = X.range[1]
   X.max = X.range[2]
   Y.min = Y.range[1]
@@ -92,7 +100,6 @@ rcylinder<-function(n,  X.range, Y.range, time.range, border=NULL, rs=0.5, a=0){
   # the spatio-temporal portions und at time.range[1]
   t.upp = time.range[2]
   t.low = sample(time.range[1]:(time.range[2]-1), n, replace=T)
-  
   
   # generate circle radia
   d_max = apply(data.frame(x=x-X.min, y=y-Y.min, xs=X.max-x, ys=Y.max-y), 1, min) # this is min vertical distance from the border.

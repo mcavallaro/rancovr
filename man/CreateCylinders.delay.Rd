@@ -22,7 +22,19 @@ CreateCylinders.delay(
 )
 }
 \arguments{
-\item{baseline.matrix.untyped}{}
+\item{observation.matrix.untyped}{A 2D matrix.}
+
+\item{baseline.matrix.untyped}{A 2dD matrix.}
+
+\item{week.range}{week range.}
+
+\item{n.cylinders}{(integer) number of proposed cylinders per week interval.}
+
+\item{rs}{A numeric.}
+
+\item{p.val.threshold}{A numeric.}
+
+\item{size_factor}{An integer.}
 }
 \description{
 n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders

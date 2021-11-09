@@ -6,18 +6,19 @@
 #X.range = range(postcode2coord[!is.na(postcode2coord$longitude),]$longitude) +  c(-2,2) * var(postcode2coord[!is.na(postcode2coord$longitude),]$longitude)
 # [1] -4.717408  0.348140
 
-
+#' Create cylinders to cover events.
+#'
 #' n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders
-#' observation.matrix  and baseline.matrix have dimension 
+#' observation.matrix  and baseline.matrix have dimension
 #' This function scans the matrices
 #' -1 in observation.matrix index means that we are excluding from week NA
-#' @param emmtype
-#' @param week.range
+#' @param observation.matrix A 2D matrix.
+#' @param baseline.matrix A 2D matrix.
+#' @param week.range week range.
 #' @param n.cylinders (integer) number of proposed cylinders per week interval.
-#' @param rs
-#' @param p.val.threshold
-
-
+#' @param p.val.threshold A numeric.
+#' @param rs A numeric.
+#' @param size_factor An integer.
 CreateCylinders<-function(observation.matrix, baseline.matrix,
                           week.range, n.cylinders=1000, rs=0.1,
                           p.val.threshold=0.05,
@@ -82,10 +83,9 @@ CreateCylinders<-function(observation.matrix, baseline.matrix,
 #' observation.matrix  and baseline.matrix have dimension 
 #' This function scans the matrices
 #' -1 in observation.matrix index means that we are excluding from week NA
-#' @inheritParams aFunction
-#' @param observation.matrix.untyped
-#' @param baseline.matrix.untyped
-#' 
+#' @inheritParams CreateCylinders
+#' @param observation.matrix.untyped A 2D matrix.
+#' @param baseline.matrix.untyped A 2dD matrix.
 CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
                                 observation.matrix.untyped, baseline.matrix.untyped,
                                 emmtype,
@@ -257,32 +257,38 @@ plotBaseline<-function(week, emmtype, z, add=F, tf=factor, emmf=emmtype.factor){
 
 
 Cluster<-function(case.df, emmtype, makeplot=FALSE, warning.score='warning.score'){
-  library(tsne)
-  # idx = rownames(observation.matrix) != 'NA'
-  # observation.matrix = observation.matrix[idx,]
-  # idx = rownames(postcode2coord.km) != 'NA'
-  # postcode2coord.km = postcode2coord.km[idx,]
-  # cases = which(observation.matrix>0, arr.ind=TRUE)
-  # cases = as.data.frame(cases)
-  # c3 = apply(cases, 1, function(x){postcode2coord.km[x['row'], 3]})
-  # c2 = apply(cases, 1, function(x){postcode2coord.km[x['row'], 2]})
-  # cases2 = cbind(cases,c2,c3)
-  idx = ((case.df$emmtype == emmtype) & !is.na(case.df$x))
-  case.df = case.df[idx, ]
-  X = tsne(case.df[,c('x', 'y', 'SAMPLE_DT_numeric')])
-  # palette = colorRampPalette(c('blue', 'red'))(max(case.df$SAMPLE_DT_numeric))
-  if (makeplot == TRUE){
-    library(viridisLite)
-    palette = viridis(max(case.df$SAMPLE_DT_numeric), begin = 0, end = 1)
-    warning.marker = 20 #ifelse(case.df[,warning.score] > 0.9, 20, 1)
-    plot(X[,1],X[,2], xlab='C1', ylab='C2', col=palette[case.df$SAMPLE_DT_numeric], pch=warning.marker,
-         main=emmtype)
-    
-    palette = viridis(max(case.df$SAMPLE_DT_numeric), alpha = 1, begin = 0, end = 1)
-    idx = ifelse(case.df[,warning.score] > 0.9, T, F)
-    points(X[idx,1],X[idx,2], xlab='C1', ylab='C2', col=palette[case.df[idx, "SAMPLE_DT_numeric"]], pch=1, cex=2)
+  if(requireNamespace("tsne")){
+    # idx = rownames(observation.matrix) != 'NA'
+    # observation.matrix = observation.matrix[idx,]
+    # idx = rownames(postcode2coord.km) != 'NA'
+    # postcode2coord.km = postcode2coord.km[idx,]
+    # cases = which(observation.matrix>0, arr.ind=TRUE)
+    # cases = as.data.frame(cases)
+    # c3 = apply(cases, 1, function(x){postcode2coord.km[x['row'], 3]})
+    # c2 = apply(cases, 1, function(x){postcode2coord.km[x['row'], 2]})
+    # cases2 = cbind(cases,c2,c3)
+    idx = ((case.df$emmtype == emmtype) & !is.na(case.df$x))
+    case.df = case.df[idx, ]
+    X = tsne(case.df[,c('x', 'y', 'SAMPLE_DT_numeric')])
+    # palette = colorRampPalette(c('blue', 'red'))(max(case.df$SAMPLE_DT_numeric))
+    if (makeplot == TRUE){
+      if(requireNamespace(viridisLite)){
+        palette = viridis(max(case.df$SAMPLE_DT_numeric), begin = 0, end = 1)
+      }else{
+        
+      }
+      warning.marker = 20 #ifelse(case.df[,warning.score] > 0.9, 20, 1)
+      plot(X[,1],X[,2], xlab='C1', ylab='C2', col=palette[case.df$SAMPLE_DT_numeric], pch=warning.marker,
+           main=emmtype)
+      
+      palette = viridis(max(case.df$SAMPLE_DT_numeric), alpha = 1, begin = 0, end = 1)
+      idx = ifelse(case.df[,warning.score] > 0.9, T, F)
+      points(X[idx,1],X[idx,2], xlab='C1', ylab='C2', col=palette[case.df[idx, "SAMPLE_DT_numeric"]], pch=1, cex=2)
+    }
+    return(X)
+  }else{
+    writeLines("This function requires tsne package.")  
   }
-  return(X)
 }
 
 PlotCluster0<-function(X, case.df, emmtype, warning.score='warning.score', legend.pos="bottomleft", ...){
@@ -316,10 +322,13 @@ PlotCluster<-function(X, case.df, emmtype, warning.score='warning.score', thresh
   if (is.null(threshold)){
     PlotCluster0(X, case.df, emmtype, warning.score, legend.pos, ...)
   }else{
-    library(viridisLite)
     idx = ((case.df$emmtype == emmtype) & !is.na(case.df$x))
     case.df = case.df[idx, ]
-    palette = viridis(max(case.df$SAMPLE_DT_numeric)+1, alpha = 1, begin = 0, end = 1)
+    if(requireNamespace(viridisLite)){
+      palette = viridis(max(case.df$SAMPLE_DT_numeric)+1, alpha = 1, begin = 0, end = 1)      
+    }else{
+      palette()
+    }
     par(fig=c(0, 1, 0, 1))
     par(mar=c(4, 4, 0.9, 4))
     plot(X[,1],X[,2], xlab='C1', ylab='C2', col=palette[case.df$SAMPLE_DT_numeric+1], pch=19, ...)

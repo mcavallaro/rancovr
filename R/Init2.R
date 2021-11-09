@@ -113,6 +113,7 @@ Clean<-function(basename){
 #' @param date.time.field A character string.
 #' @param postcode.field A character string.
 #' @return None
+#' @importFrom Matrix sparseMatrix
 #' @examples
 #' CreateObservationMatrices(case.df)
 #' CreateObservationMatrices(case.df, types=c('1.0', '33.0'), date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')

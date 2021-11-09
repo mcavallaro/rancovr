@@ -1,4 +1,4 @@
-library(optimx)
+#library(optimx)
 
 lambda<-function(x, params){
   # $$ 
@@ -25,14 +25,22 @@ neg.log.like<-function(params, data){
   integrate(lambda,lower,upper,params,subdivisions = 5000)$value - sum(log(lambda(data,params)))
 }
 
+
+
+#' Compute and save on disk 2D Sparse matrices containing the observations recorded in \code{case.df} for each type.
+#' 
+#' @param data .
+#' @param cpar numeric.
+#' @param iteration integer.
+#' @return 2D 4x2 matrix.
+#' @importFrom optimx optimx
+#' @examples
+#' cmle1(data, 1, 1000)
 cmle1<-function(data, cpar, iterations=10000){
   fn<-function(par){
     if (all(par>c(0,2,0)) & all(par<c(100, 100, 60)) ){
       res = neg.log.like(c(par, cpar), data)
     }
-    # else if ((par[4] < -0.1) | (par[4] > 0.1)){
-    #   res = 1000000 * par[4] ^ 2
-    # }
     else{
       res = Inf
     }

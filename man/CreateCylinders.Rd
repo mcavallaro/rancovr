@@ -2,10 +2,7 @@
 % Please edit documentation in R/Evaluate.r
 \name{CreateCylinders}
 \alias{CreateCylinders}
-\title{n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders
-observation.matrix  and baseline.matrix have dimension 
-This function scans the matrices
--1 in observation.matrix index means that we are excluding from week NA}
+\title{Create cylinders to cover events.}
 \usage{
 CreateCylinders(
   observation.matrix,
@@ -18,11 +15,23 @@ CreateCylinders(
 )
 }
 \arguments{
+\item{observation.matrix}{A 2D matrix.}
+
+\item{baseline.matrix}{A 2D matrix.}
+
+\item{week.range}{week range.}
+
 \item{n.cylinders}{(integer) number of proposed cylinders per week interval.}
+
+\item{rs}{A numeric.}
+
+\item{p.val.threshold}{A numeric.}
+
+\item{size_factor}{An integer.}
 }
 \description{
 n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders
-observation.matrix  and baseline.matrix have dimension 
+observation.matrix  and baseline.matrix have dimension
 This function scans the matrices
 -1 in observation.matrix index means that we are excluding from week NA
 }
