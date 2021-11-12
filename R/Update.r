@@ -45,7 +45,7 @@ UpdateObservationMatrices<-function(case.df.new, case.df.old,
 #' 
 #' Create a new baseline matrix to match the new observation matrix and makes new fit
 #'
-#' @inheritParams CreateBaselineMatrices
+#' @inheritParams CreateBaselineMatrix
 #' @return A 2D matrix
 UpgradeBaselineMatrix<-function(case.df.new, case.df.old,
                                save.on.dir=FALSE,
@@ -103,7 +103,7 @@ UpgradeBaselineMatrix<-function(case.df.new, case.df.old,
 #' does not perform fit if time.factor parameters were saved,
 #' only create a baseline matrix to match the new observation matrix.
 #'
-#' @inheritParams CreateBaselineMatrices
+#' @inheritParams CreateBaselineMatrix
 #' @return A 2D matrix
 UpdateBaselineMatrix<-function(case.df.new, case.df.old,
                                save.on.dir=FALSE,
@@ -119,7 +119,7 @@ UpdateBaselineMatrix<-function(case.df.new, case.df.old,
                               ncol = n.weeks + 2,
                               dimnames=list(postcodes, c('NA', as.character(0:n.weeks))))
 
-  time.factor = UpdateTimeFactor(case.df.new, save.on.dir, date.time.field)
+  time.factor = UpdateTimeFactor(case.df, save.on.dir, date.time.field)
   spatial.factor = PostcodeMap(matrix(data=0,
                                       nrow = n.postcodes,
                                       ncol = n.weeks + 2,
@@ -140,7 +140,7 @@ UpdateBaselineMatrix<-function(case.df.new, case.df.old,
     save.and.tell("baseline.matrix", file=file.path(getwd(), paste0('baseline_matrix_tmp.Rdata')))
   }
   return(baseline.matrix)
-
+} 
 
 #' Update Time factor
 #'
@@ -158,7 +158,7 @@ UpdateTimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
     Parameters
   },
   error = function(e){
-    cat("Computing the temporal baseline.\n")
+    cat("The parameteres were not save as Rdata. Recomputing it with `cmle`.\n")
     Parameters = cmle(case.df[,date.time.field], n.iterations, parameters)
     })
 
