@@ -123,22 +123,22 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
   if (is.null(types)){
     n.types = 1
   }else{
-    n.types = length(emmtypes)
+    n.types = length(types)
   }
   n.weeks = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) - min(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) + 1
   for (e in 1:n.types){
-    if (!is.na(types)){
+    if (!is.null(types)){
       type=types[e]
-      cat("Step", e, "of", n.types, ", creating observation matrix for", type, "emm type\n")
+      cat("Step", e, "of", n.types, ", creating observation matrix for", type, "type\n")
       idx = case.df$type == type
-      case.df = case.df[idx,]
+      case.df = case.df[idx,] ## BUG here do not overwrite case.df
     }
     observation.matrix = as(matrix(data=0,
                                    nrow=n.postcodes,
                                    ncol=n.weeks + 2,
                                    dimnames=list(postcodes,
                                                  c('NA', as.character(0:n.weeks)) )), "sparseMatrix")
-    # the dimensions correspond to postcode, emmtype, time  
+    # the dimensions correspond to postcode, type, time  
     for (i in 1:nrow(case.df)){
       postcode = case.df[i, postcode.field]
       week = case.df[i, date.time.field]
@@ -148,7 +148,7 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
       observation.matrix[postcode, as.character(week)] = observation.matrix[postcode, as.character(week)] + 1
     }
     attribute_list = attributes(observation.matrix)
-    if (is.na(types)){
+    if (is.null(types)){
       attribute_list$type = NA
     }else{
       attribute_list$type = type
@@ -156,7 +156,7 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
     attribute_list$date.time.field = date.time.field
     attributes(observation.matrix) <- attribute_list
     
-    if (!is.na(types)){
+    if (!is.null(types)){
       save.and.tell("observation.matrix",
                   file = file.path(getwd(), paste0(type, '_observation_matrix_tmp.Rdata')))
     }else{
@@ -410,8 +410,7 @@ PostcodeMap<-function(matrix){
     names(postcode2coord) = postcode.field
     # Insert coordinates and population density
     
-    # postcode.data = 
-    
+    # postcode.data is a data.frame already available in the workspace.
     postcode2coord[,c("latitude", "longitude", "Total")] = t(apply(postcode2coord, 1,
                                                                    postcode.to.location.and.population,
                                                                    postcode.data))
@@ -424,7 +423,10 @@ PostcodeMap<-function(matrix){
   return(ret)
 }
 
-#' Returns a vector represententing the temporal component of the baseline.
+
+#' Time factor
+#'
+#' Returns a vector representing the temporal component of the baseline.
 #' 
 #' @param case.df A data.frame
 #' @param save.on.dir logical. If TRUE then the vector is saved in `timefactor_tmp.Rdata` file.

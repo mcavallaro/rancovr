@@ -75,7 +75,7 @@ cmle2<-function(data, cpar){
 }
 
 
-cmle<-function(data, n.cycles=10, start=NULL){
+cmle<-function(data, n.cycles=10, start=NULL, save.on.dir=TRUE){
   par = cmle1(data, 0)
   trace = matrix(data=0, nrow = n.cycles, ncol = 4)
   for (i in 1:n.cycles){
@@ -86,10 +86,13 @@ cmle<-function(data, n.cycles=10, start=NULL){
     par = cmle1(data, par1)
   }
   par1 = cmle2(data, par)
-  res = c(par, par1)
-  trace[i,] = res
-  attributes(res) = list(trace=trace)
-  return(res)
+  Parameters = c(par, par1)
+  trace[i,] = Parameters
+  attributes(Parameters) = list(trace=trace)
+  if(save.on.dir){
+    save.and.tell('Parameters', file=file.path(getwd(), paste0('timefactor_parameters_tmp.Rdata')))
+  }
+  return(Parameters)
 }
 
 
