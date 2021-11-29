@@ -12,3 +12,18 @@
 #' }
 #' @source \url{https://www.ons.gov.uk}
 "postcode.data"
+
+
+
+#' GB boundaries.
+#'
+#' A dataset containing the boundaries of the Euro constituencies of all Great Britain,
+#' Coordinate reference systems (CRS) EPSG code 4326, which uses units of longitude and latitude
+#' on the  World Geodetic System 1984 (WGS84) ellipsoid.
+#' This information is license under the Open Government Licence v3.0, see \url{https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/}.
+#'  
+#'
+#' @import st
+#' @format Simple feature collection.
+#' @source \url{https://osdatahub.os.uk/}
+"GB.region.boundaries"
