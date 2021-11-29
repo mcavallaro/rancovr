@@ -125,7 +125,7 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
   }else{
     n.types = length(types)
   }
-  n.weeks = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) - min(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) + 1
+  n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
   for (e in 1:n.types){
     if (!is.null(types)){
       type=types[e]
@@ -154,7 +154,7 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
       attribute_list$type = type
     }
     attribute_list$date.time.field = date.time.field
-    attributes(observation.matrix) <- attribute_list
+    attributes(observation.matrix)<-attribute_list
     
     if (!is.null(types)){
       save.and.tell("observation.matrix",
@@ -450,7 +450,7 @@ TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
   error = function(e){
     cat("Computing the temporal baseline.\n")
     Parameters = cmle(case.df[,date.time.field], n.iterations, parameters)
-    n.weeks = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) - min(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) + 1
+    n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
     x = 0:n.weeks
     prediction.cmle = predict.cmle(x, Parameters)
     
@@ -485,7 +485,7 @@ EmmtypeFactor<-function(case.file){
 
 EmmtypeFactor.tau<-function(case.file, emmtypes, date.time.field = 'SAMPLE_DT_numeric'){
   load(paste0(case.file, ".Rdata"))
-  n.weeks = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) - min(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) + 1
+  n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
 
   xy.list=list()
   
@@ -516,7 +516,7 @@ EmmtypeFactor.delay_<-function(case.file, starting.week, n.weeks){
   }
   load(paste0(case.file, ".Rdata"))
   #n.weeks = max(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)]) - min(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)]) + 1
-  MAX = max(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)])
+  MAX = max(case.df$SAMPLE_DT_numeric, na.rm = T)
   # MIN = min(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)])
   # n.weeks=MAX-MIN+1
   # tmp = vector(mode = 'numeric', length=n.weeks)
@@ -560,7 +560,7 @@ CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
   postcodes = unique(case.df[,postcode.field])
   n.postcodes= length(postcodes)
   
-  n.weeks = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) - min(case.df[,date.time.field][!is.na(case.df[,date.time.field])]) + 1
+  n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
   baseline.matrix = matrix(data=0,
                               nrow = n.postcodes,
                               ncol = n.weeks + 2,
@@ -572,9 +572,9 @@ CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
                                       ncol = n.weeks + 2,
                                       dimnames=list(postcodes, c('NA', as.character(0:n.weeks)) )))$Total
   
-  for(i in 1:nrow(baseline.matrix)){
-    for(j in 1:ncol(baseline.matrix)){
-        baseline.matrix[i,j] = time.factor[j] * spatial.factor[i]
+  for(j in 1:ncol(baseline.matrix)){
+    for(i in 1:nrow(baseline.matrix)){
+      baseline.matrix[i,j] = time.factor[j] * spatial.factor[i]
     }
   }
   baseline.matrix = baseline.matrix / sum(spatial.factor, na.rm = T)
