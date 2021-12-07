@@ -125,7 +125,9 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
   }else{
     n.types = length(types)
   }
-  n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
+  maxim = max(case.df[,date.time.field], na.rm = T)
+  minim = min(case.df[,date.time.field], na.rm = T)
+  n.weeks = maxim - minim + 1
   for (e in 1:n.types){
     if (!is.null(types)){
       type=types[e]
@@ -135,9 +137,9 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
     }
     observation.matrix = as(matrix(data=0,
                                    nrow=n.postcodes,
-                                   ncol=n.weeks + 2,
+                                   ncol=n.weeks + 1,
                                    dimnames=list(postcodes,
-                                                 c('NA', as.character(0:n.weeks)) )), "sparseMatrix")
+                                                 c('NA', as.character(minim:maxim)) )), "sparseMatrix")
     # the dimensions correspond to postcode, type, time  
     for (i in 1:nrow(case.df)){
       postcode = case.df[i, postcode.field]
@@ -450,8 +452,11 @@ TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
   error = function(e){
     cat("Computing the temporal baseline.\n")
     Parameters = cmle(case.df[,date.time.field], n.iterations, parameters)
-    n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
-    x = 0:n.weeks
+    maxim = max(case.df[,date.time.field], na.rm = T)
+    minim = min(case.df[,date.time.field], na.rm = T)
+    n.weeks = maxim - minim + 1
+    x = minim:maxim
+    
     prediction.cmle = predict.cmle(x, Parameters)
     
     na = sum(is.na(case.df[,date.time.field]))
@@ -559,18 +564,19 @@ CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
   
   postcodes = unique(case.df[,postcode.field])
   n.postcodes= length(postcodes)
-  
-  n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
+  maxim = max(case.df[,date.time.field], na.rm = T)
+  minim = min(case.df[,date.time.field], na.rm = T)
+  n.weeks = maxim - minim + 1
   baseline.matrix = matrix(data=0,
-                              nrow = n.postcodes,
-                              ncol = n.weeks + 2,
-                              dimnames=list(postcodes, c('NA', as.character(0:n.weeks))))
+                           nrow = n.postcodes,
+                           ncol = n.weeks + 1,
+                           dimnames=list(postcodes, c('NA', as.character(minim:maxim))))
 
   time.factor = TimeFactor(case.df, save.on.dir, date.time.field)
   spatial.factor = PostcodeMap(matrix(data=0,
                                       nrow = n.postcodes,
-                                      ncol = n.weeks + 2,
-                                      dimnames=list(postcodes, c('NA', as.character(0:n.weeks)) )))$Total
+                                      ncol = n.weeks + 1,
+                                      dimnames=list(postcodes, c('NA', as.character(minim:maxim)) )))$Total
   
   for(j in 1:ncol(baseline.matrix)){
     for(i in 1:nrow(baseline.matrix)){

@@ -23,7 +23,7 @@
 #' This information is license under the Open Government Licence v3.0, see \url{https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/}.
 #'  
 #'
-#' @import st
+#' @import sf
 #' @format Simple feature collection.
 #' @source \url{https://osdatahub.os.uk/}
 "GB.region.boundaries"
