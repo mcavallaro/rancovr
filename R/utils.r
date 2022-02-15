@@ -221,23 +221,6 @@ vkm2latlong<-function(yx){
 }
 
 
-  
-#' @param population
-#' @param time.factor
-#' @param total.average
-Simulate<-function(population, time.factor, total.average){
-  baseline.matrix = population %o% time.factor 
-  baseline.matrix = baseline.matrix / sum(baseline.matrix) * total.average 
-  
-  flatten.baseline.matrix = c(baseline.matrix)
-  n.col = ncol(baseline.matrix)
-  simulation = rpois(length(flatten.baseline.matrix), lambda=flatten.baseline.matrix)
-  simulation = matrix(simulation, ncol=n.col)
-  rownames(simulation) = as.character(names(population))
-  colnames(simulation) = as.character(names(time.factor))
-  return(simulation)
-}
-
 scale2one<-function(x){
   x = order(x)
   range = range(x)
