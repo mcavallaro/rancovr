@@ -52,60 +52,6 @@ tabulated.baseline<-function(case.df, date.time.field = 'week'){
 }
 
 
-#' postcode.in.england
-#' 
-#' Check if postcode is in England.
-#' 
-#' @param x integer. number of cylinder samples.
-#' @param postcode.field numeric.
-#' @importFrom jsonlite read_json
-compute.from.tab.baseline<-function(cylinder, observation.matrix, tab.baseline, postcode.locations){
-  t.low = as.numeric(cylinder['t.low'])
-  t.upp = as.numeric(cylinder['t.upp'])
-  x0 = as.numeric(cylinder['x'])
-  y0 = as.numeric(cylinder['y'])
-  rho = as.numeric(cylinder['rho'])
-  t.range = as.character(as.integer(cylinder['t.low']):as.integer(cylinder['t.upp']))
-#  cat("t.range",t.range,"\n")
-
-  observations = observation.matrix[,t.range]
-
-
-  d = sqrt(
-    (tab.baseline$x - x0)^2 +
-    (tab.baseline$y - y0)^2
-  )
-  in_circle = (d < rho) & !is.na(d)
-  in_height = (tab.baseline$t >= t.low) & (tab.baseline$t <= t.upp)
-
-
-  # print('XXX')
-  # print(any(in_circle))
-  # print(any(in_height))
-  # print(tab.baseline[1,])
-  # print(cylinder)
-  # print(head(d))
-  mu = sum(tab.baseline[in_circle & in_height,]$z) #* attributes(tab.baseline)$delta2 #multiply by delta2 as this is the bin size
-  
-#  in_of_square = sum(in_circle & in_height) * delta2
-#  out_of_square = pi * rho* rho - in_of_square
-#  correct by taking into account that outsise the square there is nothing. 
-#  mu = mu * pi * rho *rho / in_of_square
-  
-  d = sqrt(
-      (as.numeric(postcode.locations$longitude) - x0)^2 +
-      (as.numeric(postcode.locations$latitude)  - y0)^2
-  )
-  in_circle = (d < rho) & (!is.na(d))
-
-  n_cases_in_cylinder = sum(observations[in_circle, ], na.rm = T)
-  
-#  ci = qpois(c(0.25,0.95) , lambda=mu)
-  p.val = ppois(n_cases_in_cylinder-1, lambda=mu, lower.tail=FALSE)
-  return (c(n_cases_in_cylinder, mu, p.val))
-}
-
-
 
 
 

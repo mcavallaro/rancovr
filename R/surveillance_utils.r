@@ -172,13 +172,22 @@ compute<-function(cylinder, observation.matrix, baseline.matrix, postcode.locati
 
 
 
-#' postcode.in.england
+#' Compute exceedance probabality in a cylinder.
 #' 
-#' Check if postcode is in England.
+#' A cylinder is defined by the circle coordinated (say, x,y, and radius) and lower and upper height limits (aay, t.low and t.upp, respectively).
+#' For a given cylinder, this function computes the number of observed events (\code{n_cases}) in the cylinder according to
+#' \code{observation.matrix}, the expected number \code{mu} of events according the Poisson point model (with intensity
+#' defined in \code{tab.baseline}), and the probability that .
+#' The function returns \code{c(n_cases, mu, p.val)}.
 #' 
-#' @param x integer. number of cylinder samples.
-#' @param postcode.field numeric.
-#' @importFrom jsonlite read_json
+#' @param cylinder 
+#' @param observation.matrix A \code{sparseMatrix} object enconding the events.
+#' @param tab.baseline An \code{expand.grid} tab enconding the baseline.
+#' @param postcode.locations A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.
+#' @import Matrix
+#' @return A \code{numeric} vector of dimension 3.
+#' @examples
+#' exceedance=compute(c(x,y,rho,t.low,t.upp), observation.matrix, tab.baseline, postcode.locations)
 compute.from.tab.baseline<-function(cylinder, observation.matrix, tab.baseline, postcode.locations){
   t.low = as.numeric(cylinder['t.low'])
   t.upp = as.numeric(cylinder['t.upp'])
