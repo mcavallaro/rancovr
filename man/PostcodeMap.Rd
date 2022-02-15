@@ -2,96 +2,24 @@
 % Please edit documentation in R/Init.r
 \name{PostcodeMap}
 \alias{PostcodeMap}
-\title{}
+\title{Map postcodes to coordinates
+Returns and save is 'postcode2coord.Rdata' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
+\code{matrix} can be a \code{Matrix} or a \code{sparseMatrix} object storing baseline or observation data.
+Requires the all postcode data tabulated in a \code{data.frame} called \code{postcode.data} available in the workspace.}
 \usage{
-PostcodeMap(matrix)
+PostcodeMap(matrix, postcode.field = "postcode")
 }
 \arguments{
-\item{matrix}{A matrix or sparse matrix.}
+\item{matrix}{A \code{Matrix} or \code{sparseMatrix}.}
 }
 \value{
-A data frame.
+A \code{data.frame}.
 }
 \description{
-postcodes = unique(case.df$`Patient Postcode`)
-  # emmtypes = unique(case.df$emmtype)
-  n.postcodes= length(postcodes)
-  n.emmtypes = length(emmtypes)
-  MAX = max(c(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)], case.df$RECEPT_DT_numeric[!is.na(case.df$RECEPT_DT_numeric)]))
-  MIN = min(c(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)], case.df$RECEPT_DT_numeric[!is.na(case.df$RECEPT_DT_numeric)]))
-  cat("Max allowed week range is", MIN, MAX, "\n")
-  if (starting.week < n.weeks){
-    starting.week = n.weeks
-    cat(sprintf("We enforced `starting.week=n.week=%d`", n.weeks), ".\n")
-  }
-  cat("We are creating", MAX - starting.week + 1, "matrices per emmtype, each with", n.weeks, "columns.\n")
-  
-  observation.matrices.untyped = list()
-  for (week in starting.week:MAX){
-    # this represents the week at week the scores are calculated
-    dimnames = list(postcodes, c(as.character( (week - n.weeks+1):(week)) ))
-    observation.matrices.untyped[[as.character(week)]] = as(matrix(data=0,
-                                                                   nrow=n.postcodes,
-                                                                   ncol=n.weeks, 
-                                                                   dimnames=dimnames), "sparseMatrix")
-  }
-  observation.matrices.typed = list()
-  for (emmtype in emmtypes){
-    observation.matrices.typed[[emmtype]] = list()
-    for (week in starting.week:MAX){
-      dimnames = list(postcodes, c(as.character( (week-n.weeks+1):(week) ) ))
-      observation.matrices.typed[[emmtype]][[as.character(week)]] = as(matrix(data=0,
-                                                                              nrow=n.postcodes,
-                                                                              ncol=n.weeks,
-                                                                              dimnames=dimnames), "sparseMatrix")
-    }
-  }
-  
-  for (week in starting.week:MAX){
-    # this represents the week at week the scores are calculated
-    # fill the untyped observation.matrix with the cases that were detected by week "week"
-    # (SAMPLE_DT<week) but whose typing occurred after the same "week" (RECEIPT_DT>week)
-    idx = (case.df$SAMPLE_DT_numeric > week - n.weeks + 1) &
-      (case.df$SAMPLE_DT_numeric <= week) &
-      (case.df$RECEPT_DT_numeric > week)
-    if (any(idx)){
-      case.df.idx = case.df[idx,]
-      for (i in 1:nrow(case.df.idx)){
-        postcode = case.df.idx[i, 'Patient Postcode']
-        week_ = case.df.idx[i, 'SAMPLE_DT_numeric']
-        observation.matrices.untyped[[as.character(week)]][postcode, as.character(week_)] = 
-          observation.matrices.untyped[[as.character(week)]][postcode, as.character(week_)] + 1
-      }
-    }
-    
-    for (emmtype in emmtypes){
-      # fill the typed observation.matrix with the cases that were detected and typed by week "week"
-      # (RECEIPT_DT<week)
-      idx = (case.df$emmtype == emmtype) &
-        (case.df$SAMPLE_DT_numeric > week - n.weeks + 1) &
-        (case.df$RECEPT_DT_numeric <= week) &
-        (case.df$SAMPLE_DT_numeric <= week)
-      if (any(idx)){
-        case.df.idx = case.df[idx,]
-        for (i in 1:nrow(case.df.idx)){
-          postcode = case.df.idx[i, 'Patient Postcode']
-          week_ = case.df.idx[i, 'SAMPLE_DT_numeric']
-          if (is.na(week_)){
-            week_ = 'NA'
-          }
-          observation.matrices.typed[[emmtype]][[as.character(week)]][postcode, as.character(week_)] = 
-            observation.matrices.typed[[emmtype]][[as.character(week)]][postcode, as.character(week_)] + 1
-        }
-      }
-    }
-  }
-  attribute_list = list(names = names(observation.matrices.untyped), starting.week=starting.week, n.weeks=n.weeks, week.max=MAX)
-  attributes(observation.matrices.untyped) <- attribute_list
-  attribute_list = list(names = names(observation.matrices.typed),starting.week=starting.week, n.weeks=n.weeks, week.max=MAX)
-  attributes(observation.matrices.typed) <- attribute_list
-}
-\details{
-
+Map postcodes to coordinates
+Returns and save is 'postcode2coord.Rdata' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
+\code{matrix} can be a \code{Matrix} or a \code{sparseMatrix} object storing baseline or observation data.
+Requires the all postcode data tabulated in a \code{data.frame} called \code{postcode.data} available in the workspace.
 }
 \examples{
 postcode2coord = PostcodeMap(observation.matrix)

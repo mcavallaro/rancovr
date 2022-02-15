@@ -1,10 +1,10 @@
 #' Lambda
 #'  
-#'   \lambda(t) = a + b + b \sin(c\,2 \pi/365 + x 2 \,\pi / 365)
+#' Seasonal model for the intensity function, \eqn{\lambda(t) = a + b + b \sin(c\,2 \pi/365 + x 2 \,\pi / 365)}.
 #' 
-#' @param x vector of time points.
-#' @param params vector of parameters of length = 4.
-#' @return a vector.
+#' @param x \code{numeric} vector of time points.
+#' @param params \code{numeric} vector of parameters of length = 4.
+#' @return a \code{numeric} vector of the same length as \code{x}.
 #' @examples
 #' lambda(c(1,2,3,4,5,6), c(1,1,1,1) )
 lambda<-function(x, params){    
@@ -21,16 +21,13 @@ lambda<-function(x, params){
 
 #' Negative log-likelihood
 #'
-#' $$
-#'   l(\lambda) = \log L(\lambda) = - \int_0^T\lambda(x) dx + \sum_{i=1}^n\log \lambda(x_i)
-#' $$
+#' \eqn{l(\lambda) = \log L(\lambda) = - \int_0^T\lambda(x) dx + \sum_{i=1}^n\log \lambda(x_i)}
 #'
-#' 
-#' @param params vector of parameters of length = 4.
-#' @param x vector of time data.
-#' @return a numeric
+#' @param params A \code{numeric} vector of parameters of length = 4.
+#' @param data A \code{numeric} vector of event times.
+#' @return \code{numeric}.
 #' @examples
-#' lambda(c(1,2,3,4,5,6), c(1,1,1,1) )
+#' neg.log.like(c(1,1,1,1),c(1,2,3,4,5,6))
 neg.log.like<-function(params, data){
   lower<-min(data)
   upper<-max(data)
@@ -39,10 +36,10 @@ neg.log.like<-function(params, data){
 
 
 
-#' Optimize the function \code{neg.log.like} conditioned on having the last parameter fixed.
+#' Optimize function \code{neg.log.like} conditioned on having the last parameter fixed.
 #' 
-#' @param data .
-#' @param cpar numeric.
+#' @param data A \code{numeric} vector of event times.
+#' @param cpar A \code{numeric}.
 #' @param iteration This is the maximum number of interations allowed for the function \code{optimx}.
 #' @return 2D 4x2 matrix.
 #' @importFrom optimx optimx
@@ -75,11 +72,11 @@ cmle1<-function(data, cpar, iterations=10000){
   return(res[3:5, id])
 }
 
-#' Optimize the function \code{neg.log.like} conditioned on having the first three parameters fixed.
+#' Optimize function \code{neg.log.like} conditioned on having the first three parameters fixed.
 #' 
-#' @param data .
-#' @param cpar numeric.
-#' @return numeric.
+#' @param data A \code{numeric} vector of event times.
+#' @param cpar \code{numeric}.
+#' @return \code{numeric}.
 #' @examples
 #' cmle2(data, c(1,1,1))
 cmle2<-function(data, cpar){
@@ -89,19 +86,19 @@ cmle2<-function(data, cpar){
   # else if ((par[4] < -0.1) | (par[4] > 0.1)){
   #   res = 1000000 * par[4] ^ 2
   # }
-  res = optimize( fn, interval = c(0,10), tol = 0.00001)
+  res = optimize(fn, interval = c(0,10), tol = 0.00001)
   return(res$minimum)
 }
 
-#' Maximum likelihood estimate
+#' Estimate the parameters for the seasonal model given the aggregated vector of event times.
 #'
 #' Optimize the function \code{neg.log.like} recursively calling \code{clme1} and \code{cmle2}.
 #' 
-#' @param data .
-#' @param n.cycles Number of time the conditional optimizers are called.
-#' @param start Starting parameters. Functionality not yet implemented.
-#' @param save.on.dir If TRUE, will save the inferred parameter in an .Rdata file
-#' @return A 2D 2x4 matrix with the estimated parameters.
+#' @param data A \code{numeric} vector of event times.
+#' @param n.cycles \code{integer}. Number of times the conditional optimizers are called.#
+#' @param start \code{numeric}. Starting parameters (not yet implemented).
+#' @param save.on.dir \code{logical}. If TRUE, will save the inferred parameter in `timefactor_parameters.Rdata`.
+#' @return \code{numeric}. A 2D 2x4 matrix with the estimated parameters.
 #' @examples
 #' cmle(data)
 cmle<-function(data, n.cycles=10, start=NULL, save.on.dir=TRUE){
@@ -119,12 +116,20 @@ cmle<-function(data, n.cycles=10, start=NULL, save.on.dir=TRUE){
   trace[i,] = Parameters
   attributes(Parameters) = list(trace=trace)
   if(save.on.dir){
-    save.and.tell('Parameters', file=file.path(getwd(), paste0('timefactor_parameters_tmp.Rdata')))
+    save.and.tell('Parameters', file=file.path(getwd(), paste0('timefactor_parameters.Rdata')))
   }
   return(Parameters)
 }
 
 
+#' Lambda
+#'  
+#' Seasonal model for the intensity function, \eqn{\lambda(t) = a + b + b \sin(c\,2 \pi/365 + x 2 \,\pi / 365)}.
+#'
+#' @inheritParams lambda
+#' @return a \code{numeric} vector of the same length as \code{x}.
+#' @examples
+#' predict.cmle(c(1,2,3,4,5,6), c(1,1,1,1) )
 predict.cmle<-lambda
 
 predict.cmle.ci<-function(x, parameters){

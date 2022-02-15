@@ -2,21 +2,21 @@
 % Please edit documentation in R/time_utils.r
 \name{cmle}
 \alias{cmle}
-\title{Maximum likelihood estimate}
+\title{Estimate the parameters for the seasonal model given the aggregated vector of event times.}
 \usage{
 cmle(data, n.cycles = 10, start = NULL, save.on.dir = TRUE)
 }
 \arguments{
-\item{data}{.}
+\item{data}{A \code{numeric} vector of event times.}
 
-\item{n.cycles}{Number of time the conditional optimizers are called.}
+\item{n.cycles}{\code{integer}. Number of times the conditional optimizers are called.#}
 
-\item{start}{Starting parameters. Functionality not yet implemented.}
+\item{start}{\code{numeric}. Starting parameters (not yet implemented).}
 
-\item{save.on.dir}{If TRUE, will save the inferred parameter in an .Rdata file}
+\item{save.on.dir}{\code{logical}. If TRUE, will save the inferred parameter in `timefactor_parameters.Rdata`.}
 }
 \value{
-A 2D 2x4 matrix with the estimated parameters.
+\code{numeric}. A 2D 2x4 matrix with the estimated parameters.
 }
 \description{
 Optimize the function \code{neg.log.like} recursively calling \code{clme1} and \code{cmle2}.

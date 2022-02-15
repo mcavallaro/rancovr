@@ -7,18 +7,16 @@
 neg.log.like(params, data)
 }
 \arguments{
-\item{params}{vector of parameters of length = 4.}
+\item{params}{A \code{numeric} vector of parameters of length = 4.}
 
-\item{x}{vector of time data.}
+\item{data}{A \code{numeric} vector of event times.}
 }
 \value{
-a numeric
+\code{numeric}.
 }
 \description{
-$$
-  l(\lambda) = \log L(\lambda) = - \int_0^T\lambda(x) dx + \sum_{i=1}^n\log \lambda(x_i)
-$$
+\eqn{l(\lambda) = \log L(\lambda) = - \int_0^T\lambda(x) dx + \sum_{i=1}^n\log \lambda(x_i)}
 }
 \examples{
-lambda(c(1,2,3,4,5,6), c(1,1,1,1) )
+neg.log.like(c(1,1,1,1),c(1,2,3,4,5,6))
 }

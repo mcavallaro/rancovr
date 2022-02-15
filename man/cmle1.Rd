@@ -2,14 +2,14 @@
 % Please edit documentation in R/time_utils.r
 \name{cmle1}
 \alias{cmle1}
-\title{Optimize the function \code{neg.log.like} conditioned on having the last parameter fixed.}
+\title{Optimize function \code{neg.log.like} conditioned on having the last parameter fixed.}
 \usage{
 cmle1(data, cpar, iterations = 10000)
 }
 \arguments{
-\item{data}{.}
+\item{data}{A \code{numeric} vector of event times.}
 
-\item{cpar}{numeric.}
+\item{cpar}{A \code{numeric}.}
 
 \item{iteration}{This is the maximum number of interations allowed for the function \code{optimx}.}
 }
@@ -17,7 +17,7 @@ cmle1(data, cpar, iterations = 10000)
 2D 4x2 matrix.
 }
 \description{
-Optimize the function \code{neg.log.like} conditioned on having the last parameter fixed.
+Optimize function \code{neg.log.like} conditioned on having the last parameter fixed.
 }
 \examples{
 cmle1(data, 1, iterations=20)

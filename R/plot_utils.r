@@ -9,7 +9,7 @@ tab.gray = "#7f7f7f"
 tab.olive = "#bcbd22"
 tab.cyan = "#17becf"
 
-plot_cases<-function(observation.matrix, week.range, postcode.locations, col='#ffa500', cex=0.8, pch=NULL){
+plotCases<-function(observation.matrix, week.range, postcode.locations, col='#ffa500', cex=0.8, pch=NULL){
   weeks<-week.range[1]:week.range[2]
 
   case_postcodes = apply(observation.matrix[,weeks], 1 , function(x)any(as.logical(x)))
@@ -23,25 +23,14 @@ plot_cases<-function(observation.matrix, week.range, postcode.locations, col='#f
   points(case_locations$longitude, case_locations$latitude, col=col, pch=pch, cex=cex)
 }
 
-plot_cylinders<-function(cylinders, color="#3182bd99",lwd=0.1){ #'#ffebeb88'
+plotCylinders<-function(cylinders, color="#3182bd99",lwd=0.1){ #'#ffebeb88'
   for(i in 1:nrow(cylinders)){
     plot.owin(disc(cylinders$rho[i], c(cylinders$x[i],cylinders$y[i])), add=TRUE, col=NA, lwd=lwd, border=color)
   }
 }
 
 
-scale2one<-function(x){
-  x = order(x)
-  range = range(x)
-  return( (x - range[1]) / (range[2] - range[1]))
-  # x = (x - mean(reference)) / sqrt(sd(reference))  + 0.5
-  # x = ifelse(x < 0, 0, x)
-  # x = ifelse(x > 1, 1, x)
-  # return(x)
-}
-
-
-plot.emm.fraction<-function(case.df, emmtypes, legend.position='topright', cols=NULL, ...){
+plotTypeFraction<-function(case.df, emmtypes, legend.position='topright', cols=NULL, ...){
   case.df.ordered = case.df[order(case.df$SAMPLE_DT_numeric),]
   case.df.ordered$cum.cases = 1:nrow(case.df)
   ylab = expression(lambda[m])
@@ -66,7 +55,7 @@ plot.emm.fraction<-function(case.df, emmtypes, legend.position='topright', cols=
 }
 
 
-plot.spaghetti<-function(prospective.w.df, ...){
+plotThread<-function(prospective.w.df, ...){
   cols = 16:NCOL(prospective.w.df)
   idx = prospective.w.df[,NCOL(prospective.w.df)] > 0.95
   R = range( prospective.w.df[idx, 'SAMPLE_DT_numeric'])

@@ -2,26 +2,28 @@
 % Please edit documentation in R/Update.r
 \name{UpdateBaselineMatrix}
 \alias{UpdateBaselineMatrix}
-\title{Upgrade baseline matrix}
+\title{Update baseline matrix}
 \usage{
 UpdateBaselineMatrix(
-  case.df.new,
-  case.df.old,
+  previous.baseline.matrix,
+  recent.case.df,
   save.on.dir = FALSE,
   date.time.field = "week",
   postcode.field = "postcode"
 )
 }
 \arguments{
-\item{date.time.field}{A character string.}
+\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `baseline_matrix.Rdata` file.}
 
-\item{postcode.field}{A character string.}
+\item{date.time.field}{A \code{character} string.}
+
+\item{postcode.field}{A \code{character} string.}
 }
 \value{
 A 2D matrix
 }
 \description{
-Create a new baseline matrix to match the new observation matrix and makes new a fit.
+Create a new baseline matrix to match the new observation matrix.
 This function is very similar to \code{UpgradeBaselineMatrix}
 does not perform fit if time.factor parameters were saved,
 only create a baseline matrix to match the new observation matrix.

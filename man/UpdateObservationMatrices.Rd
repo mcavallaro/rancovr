@@ -5,19 +5,19 @@
 \title{Upgrade observation matrix}
 \usage{
 UpdateObservationMatrices(
-  case.df.new,
   case.df.old,
+  case.df.new,
   types = NULL,
   date.time.field = "week",
   postcode.field = "postcode"
 )
 }
 \arguments{
-\item{types}{NULL or a character vector.}
+\item{types}{\code{NULL} or a \code{character} vector.}
 
-\item{date.time.field}{A character string.}
+\item{date.time.field}{A \code{character} string.}
 
-\item{postcode.field}{A character string.}
+\item{postcode.field}{A \code{character} string.}
 }
 \description{
 Create a new observation matrix and overwrite the old one

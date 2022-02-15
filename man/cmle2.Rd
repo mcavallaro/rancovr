@@ -2,20 +2,20 @@
 % Please edit documentation in R/time_utils.r
 \name{cmle2}
 \alias{cmle2}
-\title{Optimize the function \code{neg.log.like} conditioned on having the first three parameters fixed.}
+\title{Optimize function \code{neg.log.like} conditioned on having the first three parameters fixed.}
 \usage{
 cmle2(data, cpar)
 }
 \arguments{
-\item{data}{.}
+\item{data}{A \code{numeric} vector of event times.}
 
-\item{cpar}{numeric.}
+\item{cpar}{\code{numeric}.}
 }
 \value{
-numeric.
+\code{numeric}.
 }
 \description{
-Optimize the function \code{neg.log.like} conditioned on having the first three parameters fixed.
+Optimize function \code{neg.log.like} conditioned on having the first three parameters fixed.
 }
 \examples{
 cmle2(data, c(1,1,1))

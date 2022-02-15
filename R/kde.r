@@ -3,8 +3,8 @@
 #' 
 #' tabulate the baseline intensity function.
 #' 
-#' @param x integer. number of cylinder samples.
-#' @param postcode.field numeric.
+#' @param case.df A \code{data.frame} of events.
+#' @param date.time.field A \code{character} string.
 #' @importFrom KernSmooth bkde2D
 #' @importFrom KernSmooth dpik
 #' @importFrom tidyr expand_grid

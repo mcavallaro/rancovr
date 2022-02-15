@@ -12,17 +12,19 @@ CreateBaselineMatrix(
 )
 }
 \arguments{
-\item{case.df}{A \code{data.frame}.}
+\item{case.df}{A \code{data.frame} of events.}
 
-\item{date.time.field}{A character string.}
+\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `baseline_matrix.Rdata` file.}
 
-\item{postcode.field}{A character string.}
+\item{date.time.field}{A \code{character} string.}
+
+\item{postcode.field}{A \code{character} string.}
 }
 \value{
-A matrix
+A \code{Matrix}.
 }
 \description{
-Compute and save on disk a 2D dense matrix containing the spatial component of the
+Compute and save on disk a 2D dense matrix representing the spatial component of the
 baseline.
 }
 \examples{

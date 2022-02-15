@@ -10,6 +10,6 @@ URL: https://github.com/mcavallaro/rancovr
 License: MIT License
 Encoding: UTF-8
 LazyData: True
-Imports: Matrix, optimx, truncnorm, jsonlite
-Suggested: sf, spatstat, KernSmooth, tsne
+Imports: Matrix, optimx, truncnorm, sf, jsonlite
+Suggested: spatstat, KernSmooth, tsne
 RoxygenNote: 7.1.2

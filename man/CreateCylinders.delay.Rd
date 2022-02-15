@@ -15,7 +15,6 @@ CreateCylinders.delay(
   emmtype,
   week.range,
   n.cylinders = 1000,
-  rs = 0.1,
   p.val.threshold = 0.05,
   coord.df = postcode2coord,
   size_factor = 1
@@ -26,15 +25,13 @@ CreateCylinders.delay(
 
 \item{baseline.matrix.untyped}{A 2dD matrix.}
 
-\item{week.range}{week range.}
+\item{week.range}{A \code{numeric} vector to set the lower and upper limit to the heigh of the cylinders.}
 
-\item{n.cylinders}{(integer) number of proposed cylinders per week interval.}
+\item{n.cylinders}{An \code{integer}, total number of drawn cylinders.}
 
-\item{rs}{A numeric.}
+\item{p.val.threshold}{A \code{numeric}. If the probability of observed exceedance is < \code{p.val.threshold}, flag the cylinder as anomalous.}
 
-\item{p.val.threshold}{A numeric.}
-
-\item{size_factor}{An integer.}
+\item{size_factor}{A \code{numeric} multiplier to increase or reduce the cylinder heights and radia.}
 }
 \description{
 n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders

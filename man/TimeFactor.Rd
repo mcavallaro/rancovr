@@ -2,33 +2,36 @@
 % Please edit documentation in R/Init.r
 \name{TimeFactor}
 \alias{TimeFactor}
-\title{Time factor}
+\title{Find temporal component of the baseline}
 \usage{
 TimeFactor(
   case.df,
   save.on.dir = TRUE,
   get.from.dir = FALSE,
   date.time.field = "week",
-  parameters = NULL,
+  start = NULL,
   n.iterations = 20
 )
 }
 \arguments{
-\item{case.df}{A data.frame}
+\item{case.df}{A \code{data.frame} containing the events.}
 
-\item{save.on.dir}{logical. If TRUE then the vector is saved in `timefactor_tmp.Rdata` file.}
+\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `timefactor.Rdata` file.}
 
-\item{get.from.dir}{logical. If TRUE then the vector is obtained from the `timefactor_tmp.Rdata` file.}
+\item{get.from.dir}{\code{logical}. If TRUE then the vector is obtained from the `timefactor.Rdata` file.}
 
-\item{date.time.field}{A character string.}
+\item{date.time.field}{A \code{character} string.}
 
-\item{n.iterations}{An integer}
+\item{start}{\code{numeric}. Starting parameters (not yet implemented).}
+
+\item{n.iterations}{An \code{integer}.}
 }
 \value{
-A vector
+A \code{numeric} vector.
 }
 \description{
-Returns a vector representing the temporal component of the baseline.
+Returns a vector representing the temporal component of the baseline. This is obtained by calling
+\code{cmle} and \code{predict.cmle}, which fit a seasonal trend model to aggregated data and return its best estimate, respectively.
 }
 \examples{
 time.factor = TimeFactor(case.df)

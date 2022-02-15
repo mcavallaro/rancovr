@@ -5,21 +5,26 @@
 \title{Upgrade baseline matrix}
 \usage{
 UpgradeBaselineMatrix(
-  case.df.new,
+  previous.baseline.matrix,
   case.df.old,
+  case.df.new,
   save.on.dir = FALSE,
   date.time.field = "week",
-  postcode.field = "postcode"
+  postcode.field = "postcode",
+  n.iterations = 10
 )
 }
 \arguments{
-\item{date.time.field}{A character string.}
+\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `baseline_matrix.Rdata` file.}
 
-\item{postcode.field}{A character string.}
+\item{date.time.field}{A \code{character} string.}
+
+\item{postcode.field}{A \code{character} string.}
 }
 \value{
 A 2D matrix
 }
 \description{
 Create a new baseline matrix to match the new observation matrix and makes new fit
+for the temporal factor.
 }

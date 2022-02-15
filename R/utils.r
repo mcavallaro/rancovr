@@ -221,11 +221,11 @@ vkm2latlong<-function(yx){
 }
 
 
+  
+#' @param population
+#' @param time.factor
+#' @param total.average
 Simulate<-function(population, time.factor, total.average){
-  #
-  #' @param population
-  #' @param time.factor
-  #' @param total.average
   baseline.matrix = population %o% time.factor 
   baseline.matrix = baseline.matrix / sum(baseline.matrix) * total.average 
   
@@ -237,4 +237,19 @@ Simulate<-function(population, time.factor, total.average){
   colnames(simulation) = as.character(names(time.factor))
   return(simulation)
 }
+
+scale2one<-function(x){
+  x = order(x)
+  range = range(x)
+  return( (x - range[1]) / (range[2] - range[1]))
+}
+
+
+
+is_in_circle<-function(Data, x, y, rho){
+  d = sqrt((as.numeric(Data['longitude'])-x)^2 + (as.numeric(Data['latitude'])-y)^2 )
+  res<-(d<rho) & (!is.na(d))
+  return(res)
+}
+
 

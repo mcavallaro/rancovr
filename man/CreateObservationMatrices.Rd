@@ -2,7 +2,7 @@
 % Please edit documentation in R/Init.r
 \name{CreateObservationMatrices}
 \alias{CreateObservationMatrices}
-\title{Compute and save on disk 2D Sparse matrices containing the observations recorded in \code{case.df} for each type.}
+\title{CreateObservationMatrices}
 \usage{
 CreateObservationMatrices(
   case.df,
@@ -12,21 +12,25 @@ CreateObservationMatrices(
 )
 }
 \arguments{
-\item{case.df}{A \code{data.frame}.}
+\item{case.df}{A \code{data.frame} of events.}
 
-\item{types}{NULL or a character vector.}
+\item{types}{\code{NULL} or a \code{character} vector.}
 
-\item{date.time.field}{A character string.}
+\item{date.time.field}{A \code{character} string.}
 
-\item{postcode.field}{A character string.}
+\item{postcode.field}{A \code{character} string.}
 }
 \value{
 None
 }
 \description{
-Compute and save on disk 2D Sparse matrices containing the observations recorded in \code{case.df} for each type.
+Compute 2D Sparse matrices enconding observations recorded in \code{case.df}. 
+Rows are locations (indexed by postcodes) and columns are time steps.
+If a \code{character} vector of length N is passed as argument \code{types}, then N
+matrices are created only for the events with matching \code{case.df$types}.
+The matrices are saved on disk as '*observation_matrix.Rdata' files.
 }
 \examples{
 CreateObservationMatrices(case.df)
-CreateObservationMatrices(case.df, types=c('1.0', '33.0'), date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')
+CreateObservationMatrices(case.df, types=c("1.0", "33.0"), date.time.field = "SAMPLE_DT_numeric", postcode.field = "Patient Postcode")
 }

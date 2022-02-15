@@ -1,18 +1,23 @@
-#' Create cylinders to cover events.
+#' Create cylinders.
 #'
-#' n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders
-#' observation.matrix  and baseline.matrix have dimension
-#' This function scans the matrices
-#' -1 in observation.matrix index means that we are excluding from week NA
-#' @param observation.matrix A 2D matrix.
-#' @param baseline A 2D matrix or a Nx4 expand.grind data frame
-#' @param week.range week range.
-#' @param n.cylinders (integer) number of proposed cylinders per week interval.
-#' @param p.val.threshold A numeric.
-#' @param rs A numeric.
-#' @param size_factor An integer.
-CreateCylinders<-function(observation.matrix, baseline,
-                          week.range, n.cylinders=1000, rs=0.1,
+#' Create cylinders to cover events encoded in \code{observation.matrix}
+#' and evaluate their exceedances with respect to \code{baseline}.
+
+#' If \code{observation.matrix} and \code{baseline} have the same matrix dimension,
+#' the exceedances are computed calling \code{compute}. Otherwise the function
+#' this function assumes that the baseline is an \code{expand.grid} data.frame and 
+#' exceedancies are computed with \code{compute.from.tab.baseline}.
+#' @param observation.matrix A 2D \code{Matrix} or {sparseMatrix} object.
+#' @param baseline A 2D \code{matrix} or a Nx4 \code{expand.grid} data frame.
+#' @param week.range A \code{numeric} vector to set the lower and upper limit to the heigh of the cylinders.
+#' @param n.cylinders An \code{integer}, total number of drawn cylinders.
+#' @param p.val.threshold A \code{numeric}. If the probability of observed exceedance is < \code{p.val.threshold}, flag the cylinder as anomalous.
+#' @param size_factor A \code{numeric} multiplier to increase or reduce the cylinder heights and radia.
+#' @examples
+#' CreateCylinders(observation.matrix, baseline.matrix, week.range = c(0,99), n.cylinders = 10000)
+#' CreateCylinders(observation.matrix, baseline.tab, week.range = c(0,99), n.cylinders = 100)
+CreateCylinders<-function(observation.matrix, baseline, week.range,
+                          n.cylinders=1000,
                           p.val.threshold=0.05,
                           size_factor=1){
   
@@ -96,7 +101,7 @@ CreateCylinders<-function(observation.matrix, baseline,
 CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
                                 observation.matrix.untyped, baseline.matrix.untyped,
                                 emmtype,
-                                week.range, n.cylinders=1000, rs=0.1,
+                                week.range, n.cylinders=1000, 
                                 p.val.threshold=0.05, coord.df=postcode2coord,  size_factor=1){
   observation.matrix.typed = as.matrix(observation.matrix.typed[!(rownames(observation.matrix.typed) == 'NA'),])
   baseline.matrix.typed = as.matrix(baseline.matrix.typed[!(rownames(baseline.matrix.typed) == 'NA'),])

@@ -2,29 +2,35 @@
 % Please edit documentation in R/surveillance_utils.r
 \name{rcylinder}
 \alias{rcylinder}
-\title{rcylinders}
+\title{Draw random cylinder coordinates}
 \usage{
-rcylinder(n, X.range, Y.range, time.range, border = NULL, rs = 0.5, a = 0)
+rcylinder(
+  n.cylinders,
+  observation.matrix,
+  time.range,
+  radia_and_heights,
+  postcode2coord
+)
 }
 \arguments{
-\item{n}{integer. number of cylinder samples.}
+\item{n.cylinders}{An \code{integer}; the number of cylinders to draw.}
 
-\item{X.range}{numeric.}
+\item{observation.matrix}{A \code{sparseMatrix} object enconding the events.}
 
-\item{Y.range}{numeric.}
+\item{time.range}{An \code{integer} vector.}
 
-\item{time.range}{numeric}
+\item{radia_and_heights}{A \code{Matrix}.}
 
-\item{border}{NULL or numeric. It is the distance from the boundary.}
-
-\item{rs}{numeric. It is a reference size.}
+\item{postcode2coord}{A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.}
 }
 \value{
 A \code(data.frame).
 }
 \description{
-Compute random cylinder coordinates.
+Find the coordinates (centers and height limits) of cylinders
+that contain events defined in \code{observation.matrix}, with radia and heights
+given in \code{radia_and_heights}.
 }
 \examples{
-cylinders=rcylinder(10, c(-2,3), c(-10,10)), c(1, 100) )
+cylinders=rcylinder(10, observation.matrix, time.range, radia_and_heights, postcode2coord)
 }

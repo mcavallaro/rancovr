@@ -1,10 +1,20 @@
-#library(truncnorm)
 
-f_radia_and_heights<-function(baseline.matrix, weeks=1:100){
-  # this function compute the optimal radia and no. of weeks, such that the
-  # cylinders that these define contain one event in average, given the baseline.
-  n.weeks = ncol(baseline.matrix)
-  mean.baseline = mean(baseline.matrix[, 1:n.weeks])
+
+#' Find optimal radia
+#'
+#' This function compute the optimal cylinder radia, such that the corresponding
+#' cylinders contain one event in average 
+#' for the chosen N heights (\code{heights}) and a given \code{baseline.matrix}.
+#' It returns an Nx2 \code{Matrix} whose first column contains the heights and 
+#' and the second column contains the corresponding radia.
+#' @param baseline.matrix A \code{Matrix} enconding the baseline. 
+#' @param heigths \code{integer}. 
+#' @return A \code{Matrix}.
+#' @examples
+#' radia_and_heights = f_radia_and_heights(baseline.matrix, 1:10)
+f_radia_and_heights<-function(baseline.matrix, heigths=1:100){
+  n.heigths = ncol(baseline.matrix)
+  mean.baseline = mean(baseline.matrix[, 1:n.heigths])
   # R = 3959 # earth radius in miles
   # lat1 = min(postcode2coord$latitude)
   # lat2 = max(postcode2coord$latitude)
@@ -15,53 +25,63 @@ f_radia_and_heights<-function(baseline.matrix, weeks=1:100){
   n.points = nrow(baseline.matrix)
   mean.spatial.baseline = mean.baseline * n.points / total.area
   # we want A such that A * mean.spatial.baseline=1,  A * mean.spatial.baseline=1/2,  A * mean.spatial.baseline=1/3, etc
-  radia = sapply(weeks, function(x){sqrt(1 / mean.spatial.baseline / pi / x)} )
-  return(cbind(weeks, radia))
+  radia = sapply(heigths, function(x){sqrt(1 / mean.spatial.baseline / pi / x)} )
+  ret = cbind(heigths, radia)
+  colnames(ret) = c('heights','radia')
+  return(ret)
 }
 
 
-f_radia_and_heights_<-function(baseline.tab, weeks=1:100){
-  # this function compute the optimal radia and no. of weeks, such that the
-  # cylinders that these define contain one event in average, given the baseline.
-  n.weeks = length(unique(baseline.tab$t))
+#' Find optimal radia
+#'
+#' This function compute the optimal cylinder radia, such that the corresponding
+#' cylinders contain one event in average 
+#' for the chosen N heights (\code{heights}) and a given tabulated baseline.
+#' It returns an Nx2 \code{Matrix} whose first column contains the heights and 
+#' and the second column contains the corresponding radia.
+#' @param baseline.matrix An \code{expand.grid} tab enconding the baseline. 
+#' @param heigths \code{integer}. 
+#' @return A \code{Matrix}.
+#' @examples
+#' radia_and_heights = f_radia_and_heights(baseline.matrix, 1:10)
+f_radia_and_heights_<-function(baseline.tab, heights=1:100){
+  n.heights = length(unique(baseline.tab$t))
   mean.baseline = mean(baseline.tab$z[baseline.tab$z>0]) # z strictly > 0 to exclude the grid points on unpopulated area.
 
-  # R = 3959 # earth radius in miles
-  # lat1 = min(postcode2coord$latitude)
-  # lat2 = max(postcode2coord$latitude)
-  # lon1 = min(postcode2coord$longitude)
-  # lon2 = max(postcode2coord$longitude)
-  # total.area = (pi / 180) * R * R  * abs(sin(lat1)-sin(lat2)) * abs(lon1-lon2)
   total.area = 130279 # total area of England in km2
   idx = baseline.tab$z > 0
-  n.points = sum(idx) / n.weeks
+  n.points = sum(idx) / n.heights
   delta2 = prod(attributes(baseline.tab)$delta2)
   mean.spatial.baseline = mean.baseline / (n.points * delta2) * total.area
   # we want A such that A * mean.spatial.baseline=1,  A * mean.spatial.baseline=1/2,  A * mean.spatial.baseline=1/3, etc
-  radia = sapply(weeks, function(x){sqrt(1 / mean.spatial.baseline / pi / x )} )
-  return(cbind(weeks, radia))
+  radia = sapply(heights, function(x){sqrt(1 / mean.spatial.baseline / pi / x )} )
+  ret = cbind(heigths, radia)
+  colnames(ret) = c('heights','radia')
+  return(ret)
 }
 
-#' rcylinder
+
+#' Draw random cylinder coordinates
 #' 
-#' Compute random cylinder coordinates.
+#' Find the coordinates (centers and height limits) of cylinders
+#' that contain events defined in \code{observation.matrix}, with radia and heights
+#' given in \code{radia_and_heights}.
 #' 
-#' @param n integer. number of cylinder samples.
-#' @param X.range numeric.
-#' @param Y.range numeric.
-#' @param time.range numeric
-#' @param border NULL or numeric. It is the distance from the boundary.
-#' @param rs numeric. It is a reference size. 
+#' @param n.cylinders An \code{integer}; the number of cylinders to draw.
+#' @param observation.matrix A \code{sparseMatrix} object enconding the events.
+#' @param time.range An \code{integer} vector.
+#' @param radia_and_heights A \code{Matrix}.
+#' @param postcode2coord A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.
 #' @importFrom truncnorm rtruncnorm
 #' @import Matrix
 #' @return A \code(data.frame).
 #' @examples
-#' cylinders=rcylinder(10, c(-2,3), c(-10,10)), c(1, 100) )
-rcylinder<-function(n.cylinders, observation.matrix, week.range, radia_and_heights, postcode2coord){
+#' cylinders=rcylinder(10, observation.matrix, time.range, radia_and_heights, postcode2coord)
+rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heights, postcode2coord){
   if (any(rownames(observation.matrix)=='NA')){
     cat("WARNING: any(rownames(observation.matrix)=='NA'")
   }
-  cols = as.character(week.range[1]:week.range[2])
+  cols = as.character(time.range[1]:time.range[2])
   cases = which(observation.matrix[, cols] > 0, arr.ind = T)
 
   # cases is of the form:
@@ -73,7 +93,7 @@ rcylinder<-function(n.cylinders, observation.matrix, week.range, radia_and_heigh
     y = postcode2coord[cases[idx, 1], 'latitude']
     x = postcode2coord[cases[idx, 1], 'longitude']
     
-    # t = cases[idx,2] + week.range[1] - 1
+    # t = cases[idx,2] + time.range[1] - 1
     # print(head(t))
     t = as.integer(colnames(observation.matrix[,cols])[cases[idx,2]])
     # print(head(t))
@@ -90,10 +110,10 @@ rcylinder<-function(n.cylinders, observation.matrix, week.range, radia_and_heigh
     tt = t + runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2)
     
     t.low = floor(tt - radia_and_heights[,1] / 2)
-    t.min = as.integer(week.range[1])
+    t.min = as.integer(time.range[1])
 
     t.upp = ceiling(tt + radia_and_heights[,1] / 2)
-    t.max = as.integer(week.range[2])
+    t.max = as.integer(time.range[2])
     
     t.low = ifelse(t.low >= t.min, t.low, t.min)
     t.upp = ifelse(t.upp <= t.max, t.upp, t.max)
@@ -112,58 +132,94 @@ rcylinder<-function(n.cylinders, observation.matrix, week.range, radia_and_heigh
 
 
 
-# rcylinder<-function(n,  X.range, Y.range, time.range, border=NULL, rs=0.5, a=0){
-#   X.min = X.range[1]
-#   X.max = X.range[2]
-#   Y.min = Y.range[1]
-#   Y.max = Y.range[2]
-#   
-#   if (is.null(border)){
-#     border = (X.max - X.min) / 100
-#   }
-#   
-#   # generate centers in a square:
-#   x = runif(n, X.min + border, X.max - border)
-#   y = runif(n, Y.min + border, Y.max - border)
-#   
-#   # the spatio-temporal portions und at time.range[1]
-#   t.upp = time.range[2]
-#   t.low = sample(time.range[1]:(time.range[2]-1), n, replace=T)
-#   
-#   # generate circle radia
-#   d_max = apply(data.frame(x=x-X.min, y=y-Y.min, xs=X.max-x, ys=Y.max-y), 1, min) # this is min vertical distance from the border.
-#   rho = rtruncnorm(n, mean=rs, sd=rs, a=a, b=d_max)
-#   return (data.frame(x=x, y=y, rho=rho, t.low=t.low, t.upp=t.upp))
-# }
-
-is_in_circle<-function(Data, x, y, rho){
-  d = sqrt((as.numeric(Data['longitude'])-x)^2 + (as.numeric(Data['latitude'])-y)^2 )
-  res<-(d<rho) & (!is.na(d))
-  return(res)
-}
-
+#' Compute exceedance probabality in a cylinder.
+#' 
+#' A cylinder is defined by the circle coordinated (say, x,y, and radius) and lower and upper height limits (aay, t.low and t.upp, respectively).
+#' For a given cylinder, this function computes the number of observed events (\code{n_cases}) in the cylinder according to
+#' \code{observation.matrix}, the expected number \code{mu} of events according the Poisson point model (with intensity
+#' defined in \code{baseline.matrix}), and the probability that .
+#' The function returns \code{c(n_cases, mu, p.val)}.
+#' 
+#' @param cylinder 
+#' @param observation.matrix A \code{sparseMatrix} object enconding the events.
+#' @param baseline.matrix A \code{Matrix} object enconding the baseline.
+#' @param postcode.locations A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.
+#' @import Matrix
+#' @return A \code{numeric} vector of dimension 3.
+#' @examples
+#' exceedance=compute(c(x,y,rho,t.low,t.upp), observation.matrix, baseline.matrix, postcode.locations)
 compute<-function(cylinder, observation.matrix, baseline.matrix, postcode.locations){
-  # cylinder is a spatio-temporal portion
-  # extract Postcodes and times contained in cyclinders
   t.range = as.character(as.integer(cylinder['t.low']):as.integer(cylinder['t.upp']))
   observations = observation.matrix[,t.range]
   baselines = baseline.matrix[,t.range]
 
   d = sqrt(
     (as.numeric(postcode.locations$longitude) - as.numeric(cylinder['x']))^2 +
-      (as.numeric(postcode.locations$latitude)  - as.numeric(cylinder['y']))^2
+      (as.numeric(postcode.locations$latitude) - as.numeric(cylinder['y']))^2
   )
   in_circle = (d<as.numeric(cylinder['rho'])) & (!is.na(d))
-  n_cases_in_cylinder = sum(observations[in_circle, ], na.rm=T)
+  n_cases = sum(observations[in_circle, ], na.rm=T)
   # postcodes<-paste(rownames(observations[in_circle, ]), collapse = ",")
   # the sum of Poisson RVs is Poisson
   mu = sum(baselines[in_circle, ])
   #mu = sum(baselines[in_circle, ]) + 1
   
   #  ci = qpois(c(0.25, 0.95) , lambda=mu)
+  p.val = ppois(n_cases-1, lambda=mu, lower.tail=FALSE)
+  return (c(n_cases, mu, p.val))
+}
+
+
+
+
+#' postcode.in.england
+#' 
+#' Check if postcode is in England.
+#' 
+#' @param x integer. number of cylinder samples.
+#' @param postcode.field numeric.
+#' @importFrom jsonlite read_json
+compute.from.tab.baseline<-function(cylinder, observation.matrix, tab.baseline, postcode.locations){
+  t.low = as.numeric(cylinder['t.low'])
+  t.upp = as.numeric(cylinder['t.upp'])
+  x0 = as.numeric(cylinder['x'])
+  y0 = as.numeric(cylinder['y'])
+  rho = as.numeric(cylinder['rho'])
+  t.range = as.character(as.integer(cylinder['t.low']):as.integer(cylinder['t.upp']))
+#  cat("t.range",t.range,"\n")
+
+  observations = observation.matrix[,t.range]
+
+  d = sqrt(
+    (tab.baseline$x - x0)^2 +
+    (tab.baseline$y - y0)^2
+  )
+  in_circle = (d < rho) & !is.na(d)
+  in_height = (tab.baseline$t >= t.low) & (tab.baseline$t <= t.upp)
+
+  mu = sum(tab.baseline[in_circle & in_height,]$z) #* attributes(tab.baseline)$delta2 #multiply by delta2 as this is the bin size
+  
+#  in_of_square = sum(in_circle & in_height) * delta2
+#  out_of_square = pi * rho* rho - in_of_square
+#  correct by taking into account that outsise the square there is nothing. 
+#  mu = mu * pi * rho *rho / in_of_square
+  
+  d = sqrt(
+      (as.numeric(postcode.locations$longitude) - x0)^2 +
+      (as.numeric(postcode.locations$latitude)  - y0)^2
+  )
+  in_circle = (d < rho) & (!is.na(d))
+
+  n_cases_in_cylinder = sum(observations[in_circle, ], na.rm = T)
+  
+#  ci = qpois(c(0.25,0.95) , lambda=mu)
   p.val = ppois(n_cases_in_cylinder-1, lambda=mu, lower.tail=FALSE)
   return (c(n_cases_in_cylinder, mu, p.val))
 }
+
+
+
+
 
 warning_ratio<-function(i, observation.matrix, cylinders, postcode.locations){
   # check if the location i

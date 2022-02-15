@@ -15,7 +15,7 @@ devtools::install_github("mcavallaro/rancovr")
 As a demonstration, we consider the spatio-temporal coordinates stored
 in `Data/synthetic_dataset.csv`, which represent records of infection
 cases and is obtained aggregating data simulated from an endemic
-component (`end.`) and from an outbreak (`epi.`) in the UK. See
+component (`end.`) and from an outbreak (`epi.`) in England. See
 reference \[1\] for the simulation details.
 
 ``` r

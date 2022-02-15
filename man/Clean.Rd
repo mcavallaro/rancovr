@@ -2,24 +2,22 @@
 % Please edit documentation in R/Init.r
 \name{Clean}
 \alias{Clean}
-\title{Delete all \code{.RData} files with given basename.
-Can be used to clean the saved observation and baseline matrices.
-Use with caution.}
+\title{Clean}
 \usage{
 Clean(basename)
 }
 \arguments{
-\item{basename}{A string.}
+\item{basename}{A \code{character} string.}
 }
 \value{
 None
 }
 \description{
-Delete all \code{.RData} files with given basename.
+Delete all '*.RData' files with given basename.
 Can be used to clean the saved observation and baseline matrices.
 Use with caution.
 }
 \examples{
-Clean('33.0_observation_matrix_tmp')
-Clean('observation_matrix_tmp')
+Clean("33.0_observation_matrix_tmp")
+Clean("observation_matrix_tmp")
 }

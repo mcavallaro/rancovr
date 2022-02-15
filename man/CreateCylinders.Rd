@@ -2,36 +2,39 @@
 % Please edit documentation in R/Evaluate.r
 \name{CreateCylinders}
 \alias{CreateCylinders}
-\title{Create cylinders to cover events.}
+\title{Create cylinders.}
 \usage{
 CreateCylinders(
   observation.matrix,
-  baseline.matrix,
+  baseline,
   week.range,
   n.cylinders = 1000,
-  rs = 0.1,
   p.val.threshold = 0.05,
   size_factor = 1
 )
 }
 \arguments{
-\item{observation.matrix}{A 2D matrix.}
+\item{observation.matrix}{A 2D \code{Matrix} or {sparseMatrix} object.}
 
-\item{baseline.matrix}{A 2D matrix.}
+\item{baseline}{A 2D \code{matrix} or a Nx4 \code{expand.grid} data frame.}
 
-\item{week.range}{week range.}
+\item{week.range}{A \code{numeric} vector to set the lower and upper limit to the heigh of the cylinders.}
 
-\item{n.cylinders}{(integer) number of proposed cylinders per week interval.}
+\item{n.cylinders}{An \code{integer}, total number of drawn cylinders.}
 
-\item{rs}{A numeric.}
+\item{p.val.threshold}{A \code{numeric}. If the probability of observed exceedance is < \code{p.val.threshold}, flag the cylinder as anomalous.}
 
-\item{p.val.threshold}{A numeric.}
-
-\item{size_factor}{An integer.}
+\item{size_factor}{A \code{numeric} multiplier to increase or reduce the cylinder heights and radia.}
 }
 \description{
-n.cylinders=10000 takes around 3 hours for the whole dataset, to end up with 300 non-empty cylinders
-observation.matrix  and baseline.matrix have dimension
-This function scans the matrices
--1 in observation.matrix index means that we are excluding from week NA
+Create cylinders to cover events encoded in \code{observation.matrix}
+and evaluate their exceedances with respect to \code{baseline}.
+If \code{observation.matrix} and \code{baseline} have the same matrix dimension,
+the exceedances are computed calling \code{compute}. Otherwise the function
+this function assumes that the baseline is an \code{expand.grid} data.frame and 
+exceedancies are computed with \code{compute.from.tab.baseline}.
+}
+\examples{
+CreateCylinders(observation.matrix, baseline.matrix, week.range = c(0,99), n.cylinders = 10000)
+CreateCylinders(observation.matrix, baseline.tab, week.range = c(0,99), n.cylinders = 100)
 }
