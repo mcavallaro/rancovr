@@ -90,8 +90,8 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
   # SY11 3PN 6370 255
   if (sum(observation.matrix[, cols]) > 0){
     idx = sample(1:nrow(cases), n.cylinders, replace = T)
-    y = postcode2coord[cases[idx, 1], 'latitude']
-    x = postcode2coord[cases[idx, 1], 'longitude']
+    y = postcode2coord[cases[idx, 1], 'y']
+    x = postcode2coord[cases[idx, 1], 'x']
     
     # t = cases[idx,2] + time.range[1] - 1
     # print(head(t))
@@ -154,8 +154,8 @@ compute<-function(cylinder, observation.matrix, baseline.matrix, postcode.locati
   baselines = baseline.matrix[,t.range]
 
   d = sqrt(
-    (as.numeric(postcode.locations$longitude) - as.numeric(cylinder['x']))^2 +
-      (as.numeric(postcode.locations$latitude) - as.numeric(cylinder['y']))^2
+    (as.numeric(postcode.locations$x) - as.numeric(cylinder['x']))^2 +
+      (as.numeric(postcode.locations$y) - as.numeric(cylinder['y']))^2
   )
   in_circle = (d<as.numeric(cylinder['rho'])) & (!is.na(d))
   n_cases = sum(observations[in_circle, ], na.rm=T)
@@ -312,10 +312,9 @@ warning.score<-function(case, cylinders, date.time.field = 'week'){
   
   # number of cylinders that include geo-coordinate of `case`
   in_cylinder = sum(in_circle * in_cylinder_height, na.rm=T)
-
-  # number of cylinder with `warning` flag that include location `i`
-  warning = sum(cylinders$warning * in_circle * in_cylinder_height, na.rm=T)
   if (in_cylinder>0){
+    # number of cylinder with `warning` flag that include location `i`
+    warning = sum(cylinders$warning * in_circle * in_cylinder_height, na.rm=T)
     re = warning / in_cylinder
   }else{
     re = 0

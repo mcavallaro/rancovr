@@ -17,7 +17,6 @@ Clean<-function(basename){
   }
 }
 
-
 #' CreateObservationMatrices
 #'
 #' Compute 2D Sparse matrices enconding observations recorded in \code{case.df}. 
@@ -89,7 +88,7 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
 
 #' Map postcodes to coordinates
 #
-#' Returns and save is 'postcode2coord.Rdata' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
+#' Returns and save 'postcode2coord.Rdata' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
 #' \code{matrix} can be a \code{Matrix} or a \code{sparseMatrix} object storing baseline or observation data.
 #' Requires the all postcode data tabulated in a \code{data.frame} called \code{postcode.data} available in the workspace.
 #' 
@@ -101,7 +100,7 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
   writeLines("Compiling the table that maps the rows of the observation/baseline matrix to geo-coordinates and population.")
   ret<-tryCatch({
     load("postcode2coord.Rdata", verbose = 1)
-    if (all(as.character(postcode2coord[, postcode.field]) == rownames(observation.matrix))){
+    if (all(as.character(postcode2coord[, postcode.field]) == rownames(matrix))){
       writeLines("Using data loaded from `postcode2coord.Rdata`")
       postcode2coord
     }else{
@@ -112,12 +111,32 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
   error = function(e){
     postcode2coord = data.frame(postcode.field = rownames(matrix))
     names(postcode2coord) = postcode.field
-    # Insert coordinates and population density
     
+    postcode2coord$index = 1:NROW(matrix)
+    postcode2coord['key'] = c(sapply(postcode2coord[postcode.field],
+                                     function(x){gsub(" ", "", toupper(x),  fixed = TRUE)}))
+    
+    # Insert coordinates and population density
     # postcode.data is a data.frame already available in the workspace.
-    postcode2coord[,c("latitude", "longitude", "Total")] = t(apply(postcode2coord, 1,
-                                                                   postcode.to.location.and.population,
-                                                                   postcode.data))
+    postcode.data['key'] = c(sapply(postcode.data['postcode'],
+                                    function(x){gsub(" ", "", toupper(x),  fixed = TRUE)}))
+    
+    postcode.data[postcode.field] = NULL
+    
+    postcode2coord = merge(postcode2coord, postcode.data, by='key', all.x=T, all.y=F, sort=F)
+    postcode2coord = postcode2coord[order(postcode2coord$index),]
+    
+    idx = is.na(postcode2coord$latitude)
+    if(any(idx)){
+      cat("Retrieving coordinates from api.getthedata for", sum(idx), "postcodes.\n")
+      TTT=Sys.time()
+      postcode2coord[idx, c("latitude", "longitude", "Total")] = t(apply(postcode2coord[idx,], 1,
+                                                                         postcode.to.location.and.population,
+                                                                         postcode.data, postcode.field = 'key'))
+      print(Sys.time() - TTT)      
+    }    
+    
+    postcode2coord['key'] = NULL
     save.and.tell('postcode2coord', file=file.path(getwd(),
                                                    paste0("postcode2coord.Rdata")))
 
@@ -252,21 +271,25 @@ EmmtypeFactor.delay_<-function(case.file, starting.week, n.weeks){
 
 #' Create and save a baseline matrix
 #'
-#' Compute and save on disk a 2D dense matrix representing the spatial component of the
-#' baseline.
+#' Compute and save on disk a 2D dense matrix representing the
+#' baseline, given a \code{data.frame} of events (\code{case.df}), where  rows represent the spatial component of the baseline
+#' (indexed, e.g., by postcodes) and columns represent the temporal component.
+#' It is possible to insert null rows corresponding to postcodes not included in \code{case.df} using \code{more.postcodes} field
+#' for increased accuracy.
 #' 
 #' @param case.df A \code{data.frame} of events.
 #' @param save.on.dir \code{logical}. If TRUE then the vector is saved in `baseline_matrix.Rdata` file.
 #' @param date.time.field A \code{character} string.
 #' @param postcode.field A \code{character} string.
+#' @param more.postcodes A \code{character} vector of postcodes.
 #' @return A \code{Matrix}.
 #' @examples
-#' baseline.matrix = CreateBaselineMatrix(case.df)
+#' baseline.matrix = CreateBaselineMatrix(case.df, more.postcodes=c('CV31 1LS', 'E1 3BS'))
 #' baseline.matrix = CreateBaselineMatrix(case.df, date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')
 CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
-                               date.time.field='week', postcode.field='postcode'){
+                               date.time.field='week', postcode.field='postcode',  more.postcodes=c()){
   
-  postcodes = unique(case.df[,postcode.field])
+  postcodes = unique(c(case.df$`Patient Postcode`, more.postcodes))
   n.postcodes= length(postcodes)
   maxim = max(case.df[,date.time.field], na.rm = T)
   minim = min(case.df[,date.time.field], na.rm = T)
@@ -275,8 +298,9 @@ CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
                            nrow = n.postcodes,
                            ncol = n.weeks + 1,
                            dimnames=list(postcodes, c('NA', as.character(minim:maxim))))
-
-  time.factor = TimeFactor(case.df, save.on.dir, date.time.field)
+  
+    
+  time.factor = TimeFactor(case.df, save.on.dir, date.time.field = date.time.field)
   spatial.factor = PostcodeMap(matrix(data=0,
                                       nrow = n.postcodes,
                                       ncol = n.weeks + 1,
@@ -300,10 +324,21 @@ CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
 }
 
 
-#' @param population
-#' @param time.factor
-#' @param total.average
-Simulate<-function(population, time.factor, total.average){
+#' Simulate an observation matrix
+#'
+#' Given  vectors of length M and N, representing spatial 
+#' and temporal factors (e.g., population density per location and sesonal trends, respectively),
+#' this function computes a MxN baseline matrix and simulate a Poisson point process.
+#' 
+#' @param population A \code{numeric} vector.
+#' @param time.factor \code{numeric} vector.
+#' @param total.average A \code{numeric}.
+#' @param  save.baseline.matrix A \code{logical}.
+#' @return A \code{sparseMatrix} observation matrix.
+#' @importFrom Matrix sparseMatrix
+#' @examples
+#' sim = Simulate(spatial.factor, time.factor, total.average)
+Simulate<-function(population, time.factor, total.average, save.baseline.matrix=F){
   baseline.matrix = population %o% time.factor 
   baseline.matrix = baseline.matrix / sum(baseline.matrix) * total.average 
   
@@ -313,6 +348,12 @@ Simulate<-function(population, time.factor, total.average){
   simulation = matrix(simulation, ncol=n.col)
   rownames(simulation) = as.character(names(population))
   colnames(simulation) = as.character(names(time.factor))
+  simulation = as(simulation, 'sparseMatrix')
+  if(save.baseline.matrix){
+    attribute_list = attributes(simulation)
+    attribute_list$baseline.matrix = baseline.matrix
+    attributes(simulation)<-attribute_list
+  }
   return(simulation)
 }
 

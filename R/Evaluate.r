@@ -48,7 +48,7 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
   init = Sys.time()
   coord.df = coord.df[!is.na(coord.df$latitude),]
   coord.km.df = coord.df
-  coord.km.df[,2:3] = vlatlong2km(coord.df[,2:3])
+  coord.km.df[,c('y','x')]= vlatlong2km(coord.df[,c("latitude","longitude")])
   week.range = range(as.integer(week.range))
   if ((week.range[1] < min(as.integer(colnames(observation.matrix)))) | (week.range[2] > max(as.integer(colnames(observation.matrix))))){
     A = sprintf("%d-%d", week.range[1], week.range[2])

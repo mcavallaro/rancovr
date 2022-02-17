@@ -41,6 +41,7 @@ postcode.to.location.and.population<-function(x, postcodes, postcode.field='post
   # A = gsub(" ", "", toupper(postcodes['Patient.Postcode']),  fixed = TRUE)
   B = gsub(" ", "", toupper(x[postcode.field]),  fixed = TRUE)
   idx = B == postcodes[postcode.field]
+  
   s = sum(idx)
   if (is.na(s)){
     res=c(NA,NA,NA)
