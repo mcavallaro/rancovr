@@ -1,11 +1,13 @@
 # simulate endemic component
 set.seed(1)
 data("UK_population_per_postcode_with_coordinates")
-idx = order(postcode.data$postcode)
-postcode.data = postcode.data[idx,]
-idx = sort(sample(NROW(postcode.data), 10000))
-sample.population = postcode.data[idx,'Total']
-names(sample.population)<-postcode.data$postcode[idx]
+idx = sample(NROW(postcode.data), 10000)
+postcode.data. = postcode.data[idx,]
+
+idx = order(postcode.data.$postcode)
+sample.population = postcode.data.[idx,'Total']
+names(sample.population)<-postcode.data.$postcode[idx]
+rm(postcode.data.)
 
 time.factor = lambda(0:99, c(34, 16, 55,  0), names=T)
 total.average = 5000

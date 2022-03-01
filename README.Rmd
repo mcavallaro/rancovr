@@ -56,7 +56,7 @@ CreateObservationMatrices(simulation_data)
 Observations must be compared with an appropriate baseline model. If their number significantly exceeded the model prediction, an outbreak might be in progress. Estimating the baseline involves finding a temporal trend with `TimeFactor` and  a spatial trend based on the spatial population distribution.
 ```{r}
 load(file.path(getwd(), "observation_matrix.RData"), verbose=1)
-time.factor = TimeFactor(simulation_data, n.iterations=2)
+time.factor = TimeFactor(simulation_data, n.iterations=5)
 baseline.matrix = CreateBaselineMatrix(simulation_data, save.on.dir = T)
 ```
 
@@ -87,7 +87,7 @@ plotCylindersCI(cylinders, confidence.level = 0.95)
 ```
 
 The "true" baseline matrix used to generate the endemic events is available as `data()`.
-Let's use it place of the estimated baseline matrix.
+Let's use it in place of the estimated baseline matrix.
 Notice that this has higher dimensionality than the estimated baseline matrix and requires a matching observation matrix.
 ```{r}
 print(dim(baseline.matrix))
@@ -132,15 +132,16 @@ legend('bottomright', legend =  c('Using estimated baseline', 'Using true baseli
 
 With mean squared error:
 ```{r}
-simulation_data$y = ifelse(simulation_data$sim == 'epi.',1,0)
-simulation_data$sqerr = (simulation_data$y - simulation_data$warning.score)^2
+simulation_data$Y = ifelse(simulation_data$sim == 'epi.',1,0)
+simulation_data$sqerr = (simulation_data$Y - simulation_data$warning.score)^2
 cat("MSE using estimated baseline:", mean(simulation_data$sqerr), '\n') 
-simulation_data$sqerr.2 = (simulation_data$y - simulation_data$warning.score.2)^2
-cat("MSE using true baseline:",mean(simulation_data$sqerr.2), '\n') 
+simulation_data$sqerr.2 = (simulation_data$Y - simulation_data$warning.score.2)^2
+cat("MSE using true baseline:", mean(simulation_data$sqerr.2), '\n') 
 ```
 
 
 And with a map:
+
 ```{r}
 # plotBaseMap(add=F, xlim=c(-0.6,0.6), ylim=c(51.648,51.65))
 plotBaseMap(add=F, xlim=c(-1,1), ylim=c(50.648,52.65))
@@ -148,7 +149,27 @@ points(simulation_data$longitude, simulation_data$latitude,
        col=ifelse(simulation_data$sim=='epi.', tab.red, tab.blue),
        pch=ifelse(simulation_data$sim=='epi.', 4, 20),
        cex=ifelse(simulation_data$sim=='epi.', 1, 0.5))
-points(simulation_data[simulation_data$warning.score.2>0.95,]$longitude, simulation_data[simulation_data$warning.score.2>0.95,]$latitude,
+points(simulation_data[simulation_data$warning.score>0.95,]$longitude,
+       simulation_data[simulation_data$warning.score>0.95,]$latitude,
+       col=tab.orange,
+       pch=1,
+       cex=1)
+# case.df$color = rgb(colorRamp(c("blue", "red"))(case.df$warning.score) / 255)
+# plot(case.df$longitude, case.df$latitude, col=case.df$color)
+
+legend('topright',c('end.','true epi.', 'w>0.95'), pch=c(20,4,1), col=c(tab.blue, tab.red, tab.orange))
+```
+
+
+```{r}
+plotBaseMap(add=F, xlim=c(-0.6,0.6), ylim=c(51.648,51.65))
+#plotBaseMap(add=F, xlim=c(-1,1), ylim=c(50.648,52.65))
+points(simulation_data$longitude, simulation_data$latitude,
+       col=ifelse(simulation_data$sim=='epi.', tab.red, tab.blue),
+       pch=ifelse(simulation_data$sim=='epi.', 4, 20),
+       cex=ifelse(simulation_data$sim=='epi.', 1, 0.5))
+points(simulation_data[simulation_data$warning.score.2>0.95,]$longitude,
+       simulation_data[simulation_data$warning.score.2>0.95,]$latitude,
        col=tab.orange,
        pch=1,
        cex=1)
