@@ -11,7 +11,7 @@
 #' Clean("33.0_observation_matrix_tmp")
 #' Clean("observation_matrix_tmp")
 Clean<-function(basename){
-  list_files = list.files('Data',pattern = paste0(basename, '.Rdata'))
+  list_files = list.files('Data',pattern = paste0(basename, '.RData'))
   for (file in list_files){
     file.remove(file.path("Data", file))
   }
@@ -23,27 +23,39 @@ Clean<-function(basename){
 #' Rows are locations (indexed by postcodes) and columns are time steps.
 #' If a \code{character} vector of length N is passed as argument \code{types}, then N
 #' matrices are created only for the events with matching \code{case.df$types}.
-#' The matrices are saved on disk as '*observation_matrix.Rdata' files.
+#' The matrices are saved on disk as '*observation_matrix.RData' files.
 #' 
 #' @param case.df A \code{data.frame} of events.
 #' @param types \code{NULL} or a \code{character} vector.
 #' @param date.time.field A \code{character} string.
 #' @param postcode.field A \code{character} string.
+#' @param more.postcodes A \code{character} vector
+#' @param more.weeks A \code{integer} vector
 #' @return None
 #' @importFrom Matrix sparseMatrix
 #' @examples
 #' CreateObservationMatrices(case.df)
 #' CreateObservationMatrices(case.df, types=c("1.0", "33.0"), date.time.field = "SAMPLE_DT_numeric", postcode.field = "Patient Postcode")
-CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week', postcode.field = 'postcode'){
-  postcodes = unique(case.df[,postcode.field])
-  n.postcodes= length(postcodes)
+CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week', postcode.field = 'postcode',
+  more.postcodes=c(), more.weeks=c()){
+
+  if (length(more.postcodes) > 0){
+    postcodes = sort(unique(c(unlist(case.df[,postcode.field]), unlist(more.postcodes))))
+    postcodes = sort(postcodes)
+  }else{
+    postcodes = sort(unique(case.df[,postcode.field]))
+  }
+  n.postcodes = length(postcodes)
+
   if (is.null(types)){
     n.types = 1
   }else{
     n.types = length(types)
   }
-  maxim = max(case.df[,date.time.field], na.rm = T)
-  minim = min(case.df[,date.time.field], na.rm = T)
+
+  maxim = max(c(case.df[,date.time.field], unlist(as.integer(more.weeks))), na.rm = T)
+  minim = min(c(case.df[,date.time.field], unlist(as.integer(more.weeks))), na.rm = T)
+
   n.weeks = maxim - minim + 1
   for (e in 1:n.types){
     if (!is.null(types)){
@@ -77,10 +89,10 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
     
     if (!is.null(types)){
       save.and.tell("observation.matrix",
-                  file = file.path(getwd(), paste0(type, '_observation_matrix.Rdata')))
+                  file = file.path(getwd(), paste0(type, '_observation_matrix.RData')))
     }else{
       save.and.tell("observation.matrix",
-                  file = file.path(getwd(), 'observation_matrix.Rdata'))
+                  file = file.path(getwd(), 'observation_matrix.RData'))
     }
   }
 }
@@ -88,7 +100,7 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
 
 #' Map postcodes to coordinates
 #
-#' Returns and save 'postcode2coord.Rdata' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
+#' Returns and save 'postcode2coord.RData' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
 #' \code{matrix} can be a \code{Matrix} or a \code{sparseMatrix} object storing baseline or observation data.
 #' Requires the all postcode data tabulated in a \code{data.frame} called \code{postcode.data} available in the workspace.
 #' 
@@ -99,12 +111,12 @@ CreateObservationMatrices<-function(case.df, types=NULL, date.time.field = 'week
 PostcodeMap<-function(matrix, postcode.field = 'postcode'){
   writeLines("Compiling the table that maps the rows of the observation/baseline matrix to geo-coordinates and population.")
   ret<-tryCatch({
-    load("postcode2coord.Rdata", verbose = 1)
+    load("postcode2coord.RData", verbose = 1)
     if (all(as.character(postcode2coord[, postcode.field]) == rownames(matrix))){
-      writeLines("Using data loaded from `postcode2coord.Rdata`")
+      writeLines("Using data loaded from `postcode2coord.RData`")
       postcode2coord
     }else{
-      writeLines("Data loaded from `postcode2coord.Rdata` is for a different matrix and will be overwritten by the map for the current matrix.")
+      writeLines("Data loaded from `postcode2coord.RData` is for a different matrix and will be overwritten by the map for the current matrix.")
       stop() #raise error
     }
   },
@@ -117,7 +129,8 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
                                      function(x){gsub(" ", "", toupper(x),  fixed = TRUE)}))
     
     # Insert coordinates and population density
-    # postcode.data is a data.frame already available in the workspace.
+    # postcode.data is a data.frame to load.
+    data("UK_population_per_postcode_with_coordinates")
     postcode.data['key'] = c(sapply(postcode.data['postcode'],
                                     function(x){gsub(" ", "", toupper(x),  fixed = TRUE)}))
     
@@ -138,7 +151,7 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
     
     postcode2coord['key'] = NULL
     save.and.tell('postcode2coord', file=file.path(getwd(),
-                                                   paste0("postcode2coord.Rdata")))
+                                                   paste0("postcode2coord.RData")))
 
     return(postcode2coord)
   }
@@ -153,8 +166,8 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
 #' \code{cmle} and \code{predict.cmle}, which fit a seasonal trend model to aggregated data and return its best estimate, respectively. 
 #' 
 #' @param case.df A \code{data.frame} containing the events.
-#' @param save.on.dir \code{logical}. If TRUE then the vector is saved in `timefactor.Rdata` file.
-#' @param get.from.dir \code{logical}. If TRUE then the vector is obtained from the `timefactor.Rdata` file.
+#' @param save.on.dir \code{logical}. If TRUE then the vector is saved in `timefactor.RData` file.
+#' @param get.from.dir \code{logical}. If TRUE then the vector is obtained from the `timefactor.RData` file.
 #' @param date.time.field A \code{character} string.
 #' @param start \code{numeric}. Starting parameters (not yet implemented).
 #' @param n.iterations An \code{integer}.
@@ -167,7 +180,7 @@ TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
     if(get.from.dir == FALSE){
       stop("Not loading from local directory.")
     }
-    load(file.path(getwd(), paste0('timefactor.Rdata')))
+    load(file.path(getwd(), paste0('timefactor.RData')))
     cat("Temporal baseline loaded.\n")
     time.factor
   },
@@ -189,7 +202,7 @@ TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
     attr$Parameters = Parameters
     attributes(time.factor) = attr
     if(save.on.dir){
-      save.and.tell('time.factor', file=file.path(getwd(), paste0('timefactor.Rdata')))
+      save.and.tell('time.factor', file=file.path(getwd(), paste0('timefactor.RData')))
     }
     return(time.factor)
   })
@@ -198,7 +211,7 @@ TimeFactor<-function(case.df, save.on.dir = TRUE, get.from.dir = FALSE,
 
 
 EmmtypeFactor<-function(case.file){
-  load(paste0(case.file, ".Rdata"))
+  load(paste0(case.file, ".RData"))
   emmtype.factor = c(table(case.df$emmtype))
   emmtype.factor = emmtype.factor/ sum(emmtype.factor)
   xy.list=list()
@@ -211,7 +224,7 @@ EmmtypeFactor<-function(case.file){
 
 
 EmmtypeFactor.tau<-function(case.file, emmtypes, date.time.field = 'SAMPLE_DT_numeric'){
-  load(paste0(case.file, ".Rdata"))
+  load(paste0(case.file, ".RData"))
   n.weeks = max(case.df[,date.time.field], na.rm = T) - min(case.df[,date.time.field], na.rm = T) + 1
 
   xy.list=list()
@@ -241,7 +254,7 @@ EmmtypeFactor.delay_<-function(case.file, starting.week, n.weeks){
     starting.week = n.weeks
     cat(sprintf("We enforced `starting.week=n.week=%d`", n.weeks), ".\n")
   }
-  load(paste0(case.file, ".Rdata"))
+  load(paste0(case.file, ".RData"))
   #n.weeks = max(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)]) - min(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)]) + 1
   MAX = max(case.df$SAMPLE_DT_numeric, na.rm = T)
   # MIN = min(case.df$SAMPLE_DT_numeric[!is.na(case.df$SAMPLE_DT_numeric)])
@@ -278,29 +291,37 @@ EmmtypeFactor.delay_<-function(case.file, starting.week, n.weeks){
 #' for increased accuracy.
 #' 
 #' @param case.df A \code{data.frame} of events.
-#' @param save.on.dir \code{logical}. If TRUE then the vector is saved in `baseline_matrix.Rdata` file.
+#' @param save.on.dir \code{logical}. If TRUE then the vector is saved in `baseline_matrix.RData` file.
 #' @param date.time.field A \code{character} string.
 #' @param postcode.field A \code{character} string.
 #' @param more.postcodes A \code{character} vector of postcodes.
+#' @param more.weeks A \code{integer} vector of postcodes.
 #' @return A \code{Matrix}.
 #' @examples
 #' baseline.matrix = CreateBaselineMatrix(case.df, more.postcodes=c('CV31 1LS', 'E1 3BS'))
 #' baseline.matrix = CreateBaselineMatrix(case.df, date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')
 CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
-                               date.time.field='week', postcode.field='postcode',  more.postcodes=c()){
+                               date.time.field='week', postcode.field='postcode', 
+                               more.postcodes=c(), more.weeks=c()){
   
-  postcodes = unique(c(case.df$`Patient Postcode`, more.postcodes))
+  if (length(more.postcodes) > 0){
+    postcodes = sort(unique(c(unlist(case.df[,postcode.field]), unlist(more.postcodes))))
+  }else{
+    postcodes = sort(unique(case.df[,postcode.field]))
+  }
+
   n.postcodes= length(postcodes)
-  maxim = max(case.df[,date.time.field], na.rm = T)
-  minim = min(case.df[,date.time.field], na.rm = T)
+  maxim = max(c(case.df[,date.time.field], unlist(as.integer(more.weeks))), na.rm = T)
+  minim = min(c(case.df[,date.time.field], unlist(as.integer(more.weeks))), na.rm = T)
   n.weeks = maxim - minim + 1
+
   baseline.matrix = matrix(data=0,
                            nrow = n.postcodes,
                            ncol = n.weeks + 1,
                            dimnames=list(postcodes, c('NA', as.character(minim:maxim))))
   
     
-  time.factor = TimeFactor(case.df, save.on.dir, date.time.field = date.time.field)
+  time.factor = TimeFactor(case.df, save.on.dir, get.from.dir = TRUE, date.time.field = date.time.field)
   spatial.factor = PostcodeMap(matrix(data=0,
                                       nrow = n.postcodes,
                                       ncol = n.weeks + 1,
@@ -318,7 +339,7 @@ CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
   attributes(baseline.matrix)<-attribute_list
   
   if(save.on.dir){
-    save.and.tell("baseline.matrix", file=file.path(getwd(), paste0('baseline_matrix.Rdata')))
+    save.and.tell("baseline.matrix", file=file.path(getwd(), paste0('baseline_matrix.RData')))
   }
   return(baseline.matrix)
 }
@@ -334,13 +355,15 @@ CreateBaselineMatrix<-function(case.df, save.on.dir=FALSE,
 #' @param time.factor \code{numeric} vector.
 #' @param total.average A \code{numeric}.
 #' @param  save.baseline.matrix A \code{logical}.
+#' @param n.unknown.time A \code{numeric}. Represents the baseline for cases that have unknown date report.
 #' @return A \code{sparseMatrix} observation matrix.
 #' @importFrom Matrix sparseMatrix
 #' @examples
 #' sim = Simulate(spatial.factor, time.factor, total.average)
-Simulate<-function(population, time.factor, total.average, save.baseline.matrix=F){
-  baseline.matrix = population %o% time.factor 
+Simulate<-function(population, time.factor, total.average, save.baseline.matrix=F, n.unknown.time=0){
+  baseline.matrix = population %o% time.factor
   baseline.matrix = baseline.matrix / sum(baseline.matrix) * total.average 
+  # colnames(baseline.matrix) = c("NA", as.character(names(time.factor)))
   
   flatten.baseline.matrix = c(baseline.matrix)
   n.col = ncol(baseline.matrix)

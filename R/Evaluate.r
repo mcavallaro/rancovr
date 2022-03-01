@@ -21,7 +21,7 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
                           p.val.threshold=0.05,
                           size_factor=1){
   
-  # load("~/Documents/Rancovr/Data/postcode2coord.Rdata")  
+  # load("~/Documents/Rancovr/Data/postcode2coord.RData")  
   coord.df = PostcodeMap(observation.matrix)
   #postcode2coord
   test = all(dim(baseline) == dim(observation.matrix))
@@ -162,13 +162,13 @@ CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
 
 SaveCylinders<-function(cylinders, file.basename){
   write.csv(cylinders, paste0(file.basename,'.csv'), quote = F, row.names = F)
-  save.and.tell("cylinders", file = paste0(file.basename,'.Rdata'))
+  save.and.tell("cylinders", file = paste0(file.basename,'.RData'))
 }
 
 Evaluate<-function(case.file, cylinders, emmtype, p.val.threshold = 0.05,
                           warning.score.name = 'warning.score', date.time.field = 'SAMPLE_DT_numeric'){
   case.df<-tryCatch({
-    load(paste0(case.file, ".Rdata"))
+    load(paste0(case.file, ".RData"))
     case.df
   },
   error = function(e){
@@ -182,7 +182,7 @@ Evaluate<-function(case.file, cylinders, emmtype, p.val.threshold = 0.05,
     }
     case.df[,c("y", "x")] = vlatlong2km(case.df[,c("latitude", "longitude")])
     writeLines("...Done.")
-    save.and.tell('case.df', file=paste0(case.file, ".Rdata"))
+    save.and.tell('case.df', file=paste0(case.file, ".RData"))
   }
   idx = case.df$emmtype == emmtype
   writeLines(paste0("Computing warning scores for emmtype ", emmtype, "..."))

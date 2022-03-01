@@ -13,7 +13,30 @@
 #' @source \url{https://www.ons.gov.uk}
 "postcode.data"
 
+#' Real baseline matrix corresponding to the simulated data in \code{simulation_data}.
+#'
+#' @format A \code{Matrix} with 10000 rows and 100 columns.
+"baseline_for_sim"
 
+
+#' Simulation data.
+#'
+#' A dataset containing.
+#'
+#' @format A data frame with 5028 rows and 9 variables:
+#' \describe{
+#'   \item{week}
+#'   \item{postcode}{}
+#'   \item{population}{}
+#'   \item{sim}{}
+#'   \item{type}{}
+#'   \item{latitude}{}
+#'   \item{longitude}{}
+#'   \item{y}{} 
+#'   \item{x}{}  
+#' }
+#' @source \url{https://www.ons.gov.uk}
+"simulation_data"
 
 #' GB boundaries.
 #'

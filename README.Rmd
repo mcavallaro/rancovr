@@ -13,10 +13,13 @@ devtools::load_all(".")
 
 # Rancovr: Cluster detection in R with Random Neighbourhood Covering
 
-`rancovr` is a statistical software package written in R for the detection of disease clusters
-based on the  Random Neighbourhood Covering (RaNCover) of reference [1].
-`rancovr` assess whether a single recorded infection is part of a disease cluster (such that caused by a local outbreak)
-or is consistent with a baseline of sporadic cases.
+`rancovr` is a statistical software package written in R for the detection of disease clusters.
+It implements the Random Neighbourhood Covering (RaNCover) approach of reference [1].
+RaNCover assigns a score $w \in [0,1]$ to each records.
+A high score suggests that the record is likely to be part of a cluster (e.g., and infection case caused by a local outbreak),
+while a low score suggests consistency with a baseline of sporadic cases.
+
+
 
 
 ```{r eval=FALSE, include=TRUE}
@@ -27,62 +30,135 @@ devtools::install_github("mcavallaro/rancovr")
 
 As a demonstration, we consider the spatio-temporal coordinates stored in `Data/synthetic_dataset.csv`,
 which represent records of infection cases and is obtained aggregating data simulated from an endemic component (`end.`) and
-from an outbreak (`epi.`) in the UK. See reference [1] for the simulation details.
+from an outbreak (`epi.`) in the UK.  See also reference [1] for simulation details.
 
 
-```{r eval=FALSE, include=TRUE}
-case.df = read.csv(file=system.file('extdata', 'synthetic_dataset.csv' , package='rancovr'), sep = ',', stringsAsFactors = F)
-```
-
-```{r eval=TRUE, include=FALSE}
-case.df = read.csv(file='inst/extdata/synthetic_dataset.csv', sep = ',', stringsAsFactors = F)
-```
 
 ```{r}
-head(case.df)
+data("simulation_data")
+head(simulation_data)
 ```
 
-```{r}
-CreateObservationMatrices(case.df)
-```
 
 ```{r}
-time.factor = TimeFactor(case.df, n.iterations=5)
-baseline.matrix = CreateBaselineMatrix(case.df , save.on.dir = T)
+data("GB_region_boundaries")
+plotBaseMap(add=F, xlim=range(simulation_data$longitude), ylim=range(simulation_data$latitude))
+points(simulation_data$longitude, simulation_data$latitude,
+       col=ifelse(simulation_data$sim=='epi.', tab.red, tab.blue),
+       pch=ifelse(simulation_data$sim=='epi.', 1, 20),
+       cex=ifelse(simulation_data$sim=='epi.', 0.6, 0.2))
+legend('topright',c('end.','epi.'), pch=c(20,1), col=c(tab.blue, tab.red))
+```
+For convenience, all observations are arranged in a `sparseMatrix` object named `observation.matrix` and saved on disk.
+```{r}
+CreateObservationMatrices(simulation_data)
+```
+Observations must be compared with an appropriate baseline model. If their number significantly exceeded the model prediction, an outbreak might be in progress. Estimating the baseline involves finding a temporal trend with `TimeFactor` and  a spatial trend based on the spatial population distribution.
+```{r}
+load(file.path(getwd(), "observation_matrix.RData"), verbose=1)
+time.factor = TimeFactor(simulation_data, n.iterations=2)
+baseline.matrix = CreateBaselineMatrix(simulation_data, save.on.dir = T)
 ```
 
+
+
 ```{r}
-load(file.path(getwd(), "observation_matrix_tmp.Rdata"), verbose=1)
+load(file.path(getwd(), "observation_matrix.RData"), verbose=1)
 plot(time.factor, xlab = 'Week', ylab='Number of cases', xaxt='n')
-lines(colSums(baseline.matrix))
-lines(colSums(observation.matrix))
+# lines(colSums(baseline.matrix))
+points(Matrix::colSums(observation.matrix), pch='+')
 axis(side=1, at=1:length(time.factor), labels = names(time.factor))
-legend('bottomright',legend=c('Baseline', 'Observations'), pch=c(1, NA), lty=c(1,1))
+legend('bottomright',legend=c('Baseline', 'Observations'), pch=c('o', '+'))
 ```
 
 
-Create  100,000 cyclinders to cover the detected cases:
+
+
+Create  10,000 cylinders to cover the observed cases using the estimated baseline.
 
 ```{r}
-cylinders = CreateCylinders(observation.matrix = observation.matrix,
-                            baseline.matrix = baseline.matrix,
-                            week.range = c(0,99), n.cylinders = 1000)
+cylinders = CreateCylinders(observation.matrix, baseline.matrix, week.range = c(0,99), n.cylinders = 10000)
 head(cylinders)
 ```
 
-
-Compute the warning score for each case:
+Some cylinders contain much more cases than the baseline expectation:
 ```{r}
-case.df[,'warning.score'] = apply(case.df, 1, FUN=warning.score, cylinders)
-head(case.df)
+plotCylindersCI(cylinders, confidence.level = 0.95)
 ```
 
-Assess concordance with ROC-ACU
+The "true" baseline matrix used to generate the endemic events is available as `data()`.
+Let's use it place of the estimated baseline matrix.
+Notice that this has higher dimensionality than the estimated baseline matrix and requires a matching observation matrix.
+```{r}
+print(dim(baseline.matrix))
+print(dim(observation.matrix))
+
+data(baseline_for_sim)
+print(dim(baseline_for_sim))
+CreateObservationMatrices(simulation_data,
+                          more.postcodes=rownames(baseline_for_sim),
+                          more.weeks=colnames(baseline_for_sim))
+load("/home/massimo/Documents/rancovr/observation_matrix.RData", verbose=1)
+print(dim(observation.matrix))
+```
+
+
+```{r}
+cylinders.2 = CreateCylinders(observation.matrix, baseline_for_sim, week.range = c(0,99), n.cylinders = 10000)
+head(cylinders.2)
+plotCylindersCI(cylinders.2, confidence.level = 0.95)
+```
+
+
+
+Compute the warning scores for each case:
+```{r}
+simulation_data[,'warning.score'] = apply(simulation_data, 1, FUN=warning.score, cylinders)
+simulation_data[,'warning.score.2'] = apply(simulation_data, 1, FUN=warning.score, cylinders.2)
+head(simulation_data)
+```
+
+
+
+Assess concordance with ROC-AUC:
 ```{r}
 library(pROC)
-ROC = roc(ifelse(case.df$sim == 'end.', FALSE, TRUE), case.df$warning.score)
+ROC = roc(ifelse(simulation_data$sim == 'end.', FALSE, TRUE), simulation_data$warning.score)
 plot(ROC)
+ROC = roc(ifelse(simulation_data$sim == 'end.', FALSE, TRUE), simulation_data$warning.score.2)
+plot(ROC, add=T, col='red')
+legend('bottomright', legend =  c('Using estimated baseline', 'Using true baseline'), lty=1, col=c('black','red'))
 ```
+
+With mean squared error:
+```{r}
+simulation_data$y = ifelse(simulation_data$sim == 'epi.',1,0)
+simulation_data$sqerr = (simulation_data$y - simulation_data$warning.score)^2
+cat("MSE using estimated baseline:", mean(simulation_data$sqerr), '\n') 
+simulation_data$sqerr.2 = (simulation_data$y - simulation_data$warning.score.2)^2
+cat("MSE using true baseline:",mean(simulation_data$sqerr.2), '\n') 
+```
+
+
+And with a map:
+```{r}
+# plotBaseMap(add=F, xlim=c(-0.6,0.6), ylim=c(51.648,51.65))
+plotBaseMap(add=F, xlim=c(-1,1), ylim=c(50.648,52.65))
+points(simulation_data$longitude, simulation_data$latitude,
+       col=ifelse(simulation_data$sim=='epi.', tab.red, tab.blue),
+       pch=ifelse(simulation_data$sim=='epi.', 4, 20),
+       cex=ifelse(simulation_data$sim=='epi.', 1, 0.5))
+points(simulation_data[simulation_data$warning.score.2>0.95,]$longitude, simulation_data[simulation_data$warning.score.2>0.95,]$latitude,
+       col=tab.orange,
+       pch=1,
+       cex=1)
+# case.df$color = rgb(colorRamp(c("blue", "red"))(case.df$warning.score) / 255)
+# plot(case.df$longitude, case.df$latitude, col=case.df$color)
+
+legend('topright',c('end.','true epi.', 'w>0.95'), pch=c(20,4,1), col=c(tab.blue, tab.red, tab.orange))
+```
+
+
 
 [1] M. Cavallaro, J. Coelho, D. Ready, V. Decraene, T. Lamagni, N. D. McCarthy, D. Todkill, M. J. Keeling,
 Cluster detection with random neighbourhood covering: application to invasive Group A Streptococcal disease, 2021

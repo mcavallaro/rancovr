@@ -4,10 +4,11 @@
 #' 
 #' @param x \code{numeric} vector of time points.
 #' @param params \code{numeric} vector of parameters of length = 4.
+#' @param  names A vector. Can be used to label 
 #' @return a \code{numeric} vector of the same length as \code{x}.
 #' @examples
 #' lambda(c(1,2,3,4,5,6), c(1,1,1,1) )
-lambda<-function(x, params){    
+lambda<-function(x, params, names=F){    
   p1<-params[1]
   p2<-params[2]
   p3<-params[3]
@@ -15,7 +16,15 @@ lambda<-function(x, params){
    # period = 365 # (days)
   period = 52 # (weeks)
   
-  p1 + p2 + (p2 + p4 * x)* sin(2 * pi / period * p3 + x * 2 * pi / period) + p4* x
+  ret = p1 + p2 + (p2 + p4 * x)* sin(2 * pi / period * p3 + x * 2 * pi / period) + p4* x
+  
+  if(names){
+    ret = c(0, ret)
+    names(ret) = c('NA', 0:(length(ret)-2))
+    return(ret)
+  }else{
+    return(ret)    
+  }
 }
 
 
@@ -97,7 +106,7 @@ cmle2<-function(data, cpar){
 #' @param data A \code{numeric} vector of event times.
 #' @param n.cycles \code{integer}. Number of times the conditional optimizers are called.#
 #' @param start \code{numeric}. Starting parameters (not yet implemented).
-#' @param save.on.dir \code{logical}. If TRUE, will save the inferred parameter in `timefactor_parameters.Rdata`.
+#' @param save.on.dir \code{logical}. If TRUE, will save the inferred parameter in `timefactor_parameters.RData`.
 #' @return \code{numeric}. A 2D 2x4 matrix with the estimated parameters.
 #' @examples
 #' cmle(data)
@@ -116,7 +125,7 @@ cmle<-function(data, n.cycles=10, start=NULL, save.on.dir=TRUE){
   trace[i,] = Parameters
   attributes(Parameters) = list(trace=trace)
   if(save.on.dir){
-    save.and.tell('Parameters', file=file.path(getwd(), paste0('timefactor_parameters.Rdata')))
+    save.and.tell('Parameters', file=file.path(getwd(), paste0('timefactor_parameters.RData')))
   }
   return(Parameters)
 }

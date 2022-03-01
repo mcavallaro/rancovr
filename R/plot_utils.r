@@ -181,7 +181,7 @@ plot.delay.compare<-function(n.rows, prospective.w.df1, delay.w.df2,
 #' @importFrom sf st_geometry
 plotBaseMap<-function(main=NULL, add=T, boundaries=NULL, col=NA, ...){
   if (is.null(boundaries)){
-    boundaries = GB.region.Boundaries
+    boundaries = GB_region_boundaries
   }
   plot(st_geometry(boundaries), col=col, lwd=0.8,  add=add,...)
 }
