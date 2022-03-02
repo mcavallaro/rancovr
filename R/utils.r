@@ -95,10 +95,11 @@ postcode.in.england<-function(x, postcode.field='postcode'){
 #' @importFrom jsonlite read_json
 #' @return A \code(data.frame).
 postcode.to.location2<-function(x, postcode.field='postcode'){
-  B = gsub(" ", "", x[postcode.field],  fixed = TRUE)
-  B = paste0("http://api.getthedata.com/postcode/", B)
-  longitude = read_json(B)$data$longitude
-  latitude = read_json(B)$data$latitude
+#  B = gsub(" ", "", x[postcode.field],  fixed = TRUE)
+  B = paste0("http://api.getthedata.com/postcode/", x[postcode.field])
+  Data = read_json(B)$data
+  longitude = Data$longitude
+  latitude = Data$latitude
   if (class(longitude) == 'character'){
     return(c(as.numeric(latitude), as.numeric(longitude)))
   }else{

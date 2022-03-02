@@ -130,7 +130,7 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
     
     # Insert coordinates and population density
     # postcode.data is a data.frame to load.
-    data("UK_population_per_postcode_with_coordinates")
+    data("population_per_postcode_with_coordinates")
     postcode.data['key'] = c(sapply(postcode.data['postcode'],
                                     function(x){gsub(" ", "", toupper(x),  fixed = TRUE)}))
     

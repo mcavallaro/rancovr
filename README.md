@@ -5,8 +5,8 @@ detection of disease clusters. It implements the Random Neighbourhood
 Covering (RaNCover) approach of reference \[1\]. RaNCover assigns a
 score *w* ∈ \[0, 1\] to each records. A high score suggests that the
 record is likely to be part of a cluster (e.g., and infection case
-caused by a local outbreak), while a low score suggests consistency with
-a baseline of sporadic cases.
+caused by a local outbreak), while a low score suggests that the record
+is consistent with a baseline of sporadic cases.
 
 ``` r
 install.packages("devtools")
@@ -14,23 +14,30 @@ devtools::install_github("mcavallaro/rancovr")
 ```
 
 As a demonstration, we consider the spatio-temporal coordinates stored
-in `Data/synthetic_dataset.csv`, which represent records of infection
-cases and is obtained aggregating data simulated from an endemic
-component (`end.`) and from an outbreak (`epi.`) in the UK. See also
-reference \[1\] for simulation details.
+in `Data/synthetic_dataset.csv`. These represent records of infection
+cases, obtained aggregating data simulated from an endemic component
+(`end.`) and from an outbreak (`epi.`) in England. See also reference
+\[1\] for simulation details.
 
 ``` r
 data("simulation_data")
 head(simulation_data)
 ```
 
-    ##   postcode week population  sim type latitude longitude        y         x
-    ## 1  AL100DR   43         64 epi.    2 51.76370 -0.236058 5756.124 -8.254015
-    ## 2  AL100DR   46         64 epi.    1 51.76370 -0.236058 5756.124 -8.254015
-    ## 3  AL100DR   57         64 epi.    1 51.76370 -0.236058 5756.124 -8.254015
-    ## 4  AL100DR   46         64 epi.    1 51.76370 -0.236058 5756.124 -8.254015
-    ## 5  AL100SH   45        127 end.    1 51.76094 -0.238136 5755.816 -8.328354
-    ## 6  AL100SH   48        127 epi.    1 51.76094 -0.238136 5755.816 -8.328354
+    ##   postcode week population  sim type latitude  longitude Postcode Total
+    ## 1  AL100AZ   59         67 epi.    1 51.76421 -0.2309368  AL100AZ    67
+    ## 2  AL100AZ   41         67 epi.    2 51.76421 -0.2309368  AL100AZ    67
+    ## 3  AL100AZ   51         67 epi.    2 51.76421 -0.2309368  AL100AZ    67
+    ## 4  AL100DR   50         64 epi.    1 51.76370 -0.2360576  AL100DR    64
+    ## 5  AL100DR   47         64 epi.    1 51.76370 -0.2360576  AL100DR    64
+    ## 6  AL100DR   51         64 epi.    1 51.76370 -0.2360576  AL100DR    64
+    ##          y         x
+    ## 1 5756.180 -8.074648
+    ## 2 5756.180 -8.074648
+    ## 3 5756.180 -8.074648
+    ## 4 5756.123 -8.254003
+    ## 5 5756.123 -8.254003
+    ## 6 5756.123 -8.254003
 
 ``` r
 data("GB_region_boundaries")
@@ -55,8 +62,8 @@ CreateObservationMatrices(simulation_data)
 
 Observations must be compared with an appropriate baseline model. If
 their number significantly exceeded the model prediction, an outbreak
-might be in progress. Estimating the baseline involves finding a
-temporal trend with `TimeFactor` and a spatial trend based on the
+might be occurring. Estimating the baseline involves finding a temporal
+trend (using the function `TimeFactor`) and a spatial trend based on the
 spatial population distribution.
 
 ``` r
@@ -67,11 +74,11 @@ load(file.path(getwd(), "observation_matrix.RData"), verbose=1)
     ##   observation.matrix
 
 ``` r
-time.factor = TimeFactor(simulation_data, n.iterations=2)
+time.factor = TimeFactor(simulation_data, n.iterations=5)
 ```
 
     ## Computing the temporal baseline.
-    ## Estimating parameters for temporal trend, step  1  of  2 .Estimating parameters for temporal trend, step  2  of  2 .The variable `Parameters` has been saved on disk in file `/home/massimo/Documents/rancovr/timefactor_parameters.RData`.
+    ## Estimating parameters for temporal trend, step  1  of  5 .Estimating parameters for temporal trend, step  2  of  5 .Estimating parameters for temporal trend, step  3  of  5 .Estimating parameters for temporal trend, step  4  of  5 .Estimating parameters for temporal trend, step  5  of  5 .The variable `Parameters` has been saved on disk in file `/home/massimo/Documents/rancovr/timefactor_parameters.RData`.
     ## Load on memory with `load("/home/massimo/Documents/rancovr/timefactor_parameters.RData", verbose=1)`.
     ## The variable `time.factor` has been saved on disk in file `/home/massimo/Documents/rancovr/timefactor.RData`.
     ## Load on memory with `load("/home/massimo/Documents/rancovr/timefactor.RData", verbose=1)`.
@@ -111,11 +118,11 @@ legend('bottomright',legend=c('Baseline', 'Observations'), pch=c('o', '+'))
 
 ![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
-Create 10,000 cylinders to cover the observed cases using the estimated
+Create 100,000 cylinders to cover the observed cases using the estimated
 baseline.
 
 ``` r
-cylinders = CreateCylinders(observation.matrix, baseline.matrix, week.range = c(0,99), n.cylinders = 10000)
+cylinders = CreateCylinders(observation.matrix, baseline.matrix, week.range = c(0,99), n.cylinders = 100000)
 ```
 
     ## Compiling the table that maps the rows of the observation/baseline matrix to geo-coordinates and population.
@@ -123,21 +130,29 @@ cylinders = CreateCylinders(observation.matrix, baseline.matrix, week.range = c(
     ##   postcode2coord
     ## Using data loaded from `postcode2coord.RData`
     ## Evaluating cylinder exceedances from  01/01/15  to  24/11/16 .
-    ## Time difference of 9.876127 secs
+    ## Time difference of 1.62046 mins
 
 ``` r
 head(cylinders)
 ```
 
-    ##            x        y       rho t.low t.upp n_obs        mu      p.val warning
-    ## 1  -18.16072 5763.851  6.192814     0    14     2 2.1668782 0.63728284   FALSE
-    ## 2  -70.10432 5642.778  8.192323    28    41     3 4.4986442 0.82626937   FALSE
-    ## 3  -55.09525 5961.819  6.345746     0    21     9 8.0411532 0.41319689   FALSE
-    ## 4  -88.65540 5717.108 10.033506    23    32    12 6.0616573 0.02151707    TRUE
-    ## 5 -190.66422 5619.282  9.459680    21    31     1 0.0417387 0.04087963    TRUE
-    ## 6  -50.15022 5895.504 10.726269    12    20     5 4.9608022 0.55260204   FALSE
+    ##             x        y       rho t.low t.upp n_obs         mu      p.val
+    ## 1   -9.512553 5720.063 14.311616    21    26    40 34.5261054 0.19624700
+    ## 2  -13.733509 5807.403  7.155808     0    12     1  0.7111017 0.50889716
+    ## 3 -134.616336 5623.578  6.746561    52    71     4  1.5466504 0.07163341
+    ## 4  -63.364792 5837.851  5.968356    48    72    26 29.5764845 0.76923125
+    ## 5  -91.143168 5730.355  6.246101     3    25     7  6.0378388 0.39977477
+    ## 6  -44.871282 6112.868  6.102494    14    37    18 11.6333849 0.04996999
+    ##   warning
+    ## 1   FALSE
+    ## 2   FALSE
+    ## 3   FALSE
+    ## 4   FALSE
+    ## 5   FALSE
+    ## 6    TRUE
 
-Some cylinders contain much more cases than the baseline expectation:
+Some cylinders contain much more cases than the baseline expectation.
+Such cylinders cover epidemic event.
 
 ``` r
 plotCylindersCI(cylinders, confidence.level = 0.95)
@@ -146,21 +161,22 @@ plotCylindersCI(cylinders, confidence.level = 0.95)
 ![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 The “true” baseline matrix used to generate the endemic events is
-available as `data()`. Let’s use it place of the estimated baseline
-matrix. Notice that this has higher dimensionality than the estimated
-baseline matrix and requires a matching observation matrix.
+available as `data()`. Let’s use it in place of the estimated baseline
+matrix. Notice that the true baseline matrix has higher dimensionality
+than the estimated baseline matrix (it includes entries for more
+postcodes and times) and requires a matching observation matrix.
 
 ``` r
 print(dim(baseline.matrix))
 ```
 
-    ## [1] 3437  101
+    ## [1] 3446  101
 
 ``` r
 print(dim(observation.matrix))
 ```
 
-    ## [1] 3437  101
+    ## [1] 3446  101
 
 ``` r
 data(baseline_for_sim)
@@ -196,7 +212,7 @@ print(dim(observation.matrix))
     ## [1] 10000   101
 
 ``` r
-cylinders.2 = CreateCylinders(observation.matrix, baseline_for_sim, week.range = c(0,99), n.cylinders = 10000)
+cylinders.2 = CreateCylinders(observation.matrix, baseline_for_sim, week.range = c(0,99), n.cylinders = 100000)
 ```
 
     ## Compiling the table that maps the rows of the observation/baseline matrix to geo-coordinates and population.
@@ -210,19 +226,19 @@ cylinders.2 = CreateCylinders(observation.matrix, baseline_for_sim, week.range =
     ## The variable `postcode2coord` has been saved on disk in file `/home/massimo/Documents/rancovr/postcode2coord.RData`.
     ## Load on memory with `load("/home/massimo/Documents/rancovr/postcode2coord.RData", verbose=1)`.
     ## Evaluating cylinder exceedances from  01/01/15  to  24/11/16 .
-    ## Time difference of 16.59341 secs
+    ## Time difference of 2.642384 mins
 
 ``` r
 head(cylinders.2)
 ```
 
-    ##              x        y       rho t.low t.upp n_obs        mu        p.val
-    ## 1    0.1985695 5746.081 14.399495    46    51    44 15.583102 2.928384e-09
-    ## 2 -111.1596446 5736.521  8.683222    30    42     7  4.995502 2.371591e-01
-    ## 3  -81.8429208 5962.442 14.399495    10    15    13  7.689801 5.000908e-02
-    ## 4  -37.4708644 6117.299  6.984781     2    20     6 11.408905 9.706869e-01
-    ## 5  -38.8795634 5954.730  7.696854    65    80    10  7.981703 2.811081e-01
-    ## 6    0.1922021 5712.078  7.987403    76    90     9 13.242969 9.108448e-01
+    ##              x        y       rho t.low t.upp n_obs        mu       p.val
+    ## 1    5.6383687 5724.717  7.987403    27    41    26 14.068329 0.002776905
+    ## 2   -6.9825321 5893.372  9.107041     4    15     4  1.506170 0.066419281
+    ## 3  -88.4081075 5932.797  6.984781     0    13     9  7.381465 0.321824199
+    ## 4   -1.2414016 5733.114 11.757139    42    49    30 33.839933 0.768372193
+    ## 5   -0.5376942 5745.217  7.199748    57    74    18 13.633585 0.147727675
+    ## 6 -102.2708911 5726.610  9.107041    80    91     1  1.265458 0.717890066
     ##   warning
     ## 1    TRUE
     ## 2   FALSE
@@ -245,20 +261,20 @@ simulation_data[,'warning.score.2'] = apply(simulation_data, 1, FUN=warning.scor
 head(simulation_data)
 ```
 
-    ##   postcode week population  sim type latitude longitude        y         x
-    ## 1  AL100DR   43         64 epi.    2 51.76370 -0.236058 5756.124 -8.254015
-    ## 2  AL100DR   46         64 epi.    1 51.76370 -0.236058 5756.124 -8.254015
-    ## 3  AL100DR   57         64 epi.    1 51.76370 -0.236058 5756.124 -8.254015
-    ## 4  AL100DR   46         64 epi.    1 51.76370 -0.236058 5756.124 -8.254015
-    ## 5  AL100SH   45        127 end.    1 51.76094 -0.238136 5755.816 -8.328354
-    ## 6  AL100SH   48        127 epi.    1 51.76094 -0.238136 5755.816 -8.328354
-    ##   warning.score warning.score.2
-    ## 1     0.9558824       0.9672131
-    ## 2     1.0000000       0.9873418
-    ## 3     0.8269231       0.8620690
-    ## 4     1.0000000       0.9873418
-    ## 5     1.0000000       1.0000000
-    ## 6     1.0000000       1.0000000
+    ##   postcode week population  sim type latitude  longitude Postcode Total
+    ## 1  AL100AZ   59         67 epi.    1 51.76421 -0.2309368  AL100AZ    67
+    ## 2  AL100AZ   41         67 epi.    2 51.76421 -0.2309368  AL100AZ    67
+    ## 3  AL100AZ   51         67 epi.    2 51.76421 -0.2309368  AL100AZ    67
+    ## 4  AL100DR   50         64 epi.    1 51.76370 -0.2360576  AL100DR    64
+    ## 5  AL100DR   47         64 epi.    1 51.76370 -0.2360576  AL100DR    64
+    ## 6  AL100DR   51         64 epi.    1 51.76370 -0.2360576  AL100DR    64
+    ##          y         x warning.score warning.score.2
+    ## 1 5756.180 -8.074648     0.8692308       0.9529412
+    ## 2 5756.180 -8.074648     0.8918269       0.9187935
+    ## 3 5756.180 -8.074648     0.9714994       0.9910941
+    ## 4 5756.123 -8.254003     0.9759036       0.9987294
+    ## 5 5756.123 -8.254003     0.9849315       0.9879357
+    ## 6 5756.123 -8.254003     0.9742015       0.9911055
 
 Assess concordance with ROC-AUC:
 
@@ -285,6 +301,12 @@ ROC = roc(ifelse(simulation_data$sim == 'end.', FALSE, TRUE), simulation_data$wa
 
 ``` r
 plot(ROC)
+print(ROC$auc)
+```
+
+    ## Area under the curve: 0.9997
+
+``` r
 ROC = roc(ifelse(simulation_data$sim == 'end.', FALSE, TRUE), simulation_data$warning.score.2)
 ```
 
@@ -293,6 +315,12 @@ ROC = roc(ifelse(simulation_data$sim == 'end.', FALSE, TRUE), simulation_data$wa
 
 ``` r
 plot(ROC, add=T, col='red')
+print(ROC$auc)
+```
+
+    ## Area under the curve: 0.9997
+
+``` r
 legend('bottomright', legend =  c('Using estimated baseline', 'Using true baseline'), lty=1, col=c('black','red'))
 ```
 
@@ -301,30 +329,31 @@ legend('bottomright', legend =  c('Using estimated baseline', 'Using true baseli
 With mean squared error:
 
 ``` r
-simulation_data$y = ifelse(simulation_data$sim == 'epi.',1,0)
-simulation_data$sqerr = (simulation_data$y - simulation_data$warning.score)^2
+simulation_data$Y = ifelse(simulation_data$sim == 'epi.',1,0)
+simulation_data$sqerr = (simulation_data$Y - simulation_data$warning.score)^2
 cat("MSE using estimated baseline:", mean(simulation_data$sqerr), '\n') 
 ```
 
-    ## MSE using estimated baseline: 0.03570108
+    ## MSE using estimated baseline: 0.02557394
 
 ``` r
-simulation_data$sqerr.2 = (simulation_data$y - simulation_data$warning.score.2)^2
-cat("MSE using true baseline:",mean(simulation_data$sqerr.2), '\n') 
+simulation_data$sqerr.2 = (simulation_data$Y - simulation_data$warning.score.2)^2
+cat("MSE using true baseline:", mean(simulation_data$sqerr.2), '\n') 
 ```
 
-    ## MSE using true baseline: 0.04586054
+    ## MSE using true baseline: 0.03922385
 
 And with a map:
 
 ``` r
-# plotBaseMap(add=F, xlim=c(-0.6,0.6), ylim=c(51.648,51.65))
+#plotBaseMap(add=F, xlim=c(-0.6,0.6), ylim=c(51.648,51.65))
 plotBaseMap(add=F, xlim=c(-1,1), ylim=c(50.648,52.65))
 points(simulation_data$longitude, simulation_data$latitude,
        col=ifelse(simulation_data$sim=='epi.', tab.red, tab.blue),
        pch=ifelse(simulation_data$sim=='epi.', 4, 20),
        cex=ifelse(simulation_data$sim=='epi.', 1, 0.5))
-points(simulation_data[simulation_data$warning.score.2>0.95,]$longitude, simulation_data[simulation_data$warning.score.2>0.95,]$latitude,
+points(simulation_data[simulation_data$warning.score>0.95,]$longitude,
+       simulation_data[simulation_data$warning.score>0.95,]$latitude,
        col=tab.orange,
        pch=1,
        cex=1)
@@ -335,6 +364,26 @@ legend('topright',c('end.','true epi.', 'w>0.95'), pch=c(20,4,1), col=c(tab.blue
 ```
 
 ![](README_files/figure-markdown_github/unnamed-chunk-15-1.png)
+
+``` r
+plotBaseMap(add=F, xlim=c(-0.6,0.6), ylim=c(51.648,51.65))
+#plotBaseMap(add=F, xlim=c(-1,1), ylim=c(50.648,52.65))
+points(simulation_data$longitude, simulation_data$latitude,
+       col=ifelse(simulation_data$sim=='epi.', tab.red, tab.blue),
+       pch=ifelse(simulation_data$sim=='epi.', 4, 20),
+       cex=ifelse(simulation_data$sim=='epi.', 1, 0.5))
+points(simulation_data[simulation_data$warning.score.2>0.95,]$longitude,
+       simulation_data[simulation_data$warning.score.2>0.95,]$latitude,
+       col=tab.orange,
+       pch=1,
+       cex=1)
+# case.df$color = rgb(colorRamp(c("blue", "red"))(case.df$warning.score) / 255)
+# plot(case.df$longitude, case.df$latitude, col=case.df$color)
+
+legend('topright',c('end.','true epi.', 'w>0.95'), pch=c(20,4,1), col=c(tab.blue, tab.red, tab.orange))
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
 \[1\] M. Cavallaro, J. Coelho, D. Ready, V. Decraene, T. Lamagni, N. D.
 McCarthy, D. Todkill, M. J. Keeling, Cluster detection with random

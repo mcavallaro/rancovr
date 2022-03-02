@@ -1,12 +1,12 @@
 # simulate endemic component
 set.seed(1)
-data("UK_population_per_postcode_with_coordinates")
-idx = sample(NROW(postcode.data), 10000)
+data("population_per_postcode_with_coordinates")
+
+idx = sort(sample(NROW(postcode.data), 10000))
 postcode.data. = postcode.data[idx,]
 
-idx = order(postcode.data.$postcode)
-sample.population = postcode.data.[idx,'Total']
-names(sample.population)<-postcode.data.$postcode[idx]
+sample.population = postcode.data.[,'Total']
+names(sample.population)<-postcode.data.$postcode
 rm(postcode.data.)
 
 time.factor = lambda(0:99, c(34, 16, 55,  0), names=T)
@@ -61,7 +61,9 @@ simulation_data$type[sample(1:NROW(simulation_data),  round(0.2 * NROW(simulatio
 
 simulation_data = merge(simulation_data[,-1], postcode.data, by = 'postcode')
 simulation_data[, c('y','x')] = vlatlong2km(simulation_data[,c('latitude', 'longitude')])
-simulation_data = simulation_data[, -c(6,7,8,9)]
+simulation_data$Males =NULL
+simulation_data$Females=NULL
+simulation_data$Occupied_Households=NULL
 
 #write.table(simulation_data, file = 'data/simulation_data.csv', sep=';', row.names = FALSE)
 save(simulation_data, file = "data/simulation_data.RData")
