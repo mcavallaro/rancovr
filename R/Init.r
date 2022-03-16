@@ -380,3 +380,57 @@ Simulate<-function(population, time.factor, total.average, save.baseline.matrix=
   return(simulation)
 }
 
+
+
+# this function estimates the prevalence of an emm type.
+# According to wikipedia, the duration of treatment is around 10 days
+# This suggested that an individual stays infected for around 10 days.
+# Given the number of reports in a week (incidence), we model the fraction of active cases
+# using weighting each reported cases with an decaying exponential with rate d=1/2 weeks
+# 
+EmmtypeFactor.tau2<-function(case.file, emmtypes, d=1/2, date.time.field = 'SAMPLE_DT_numeric'){
+  # According to wikipedia, the duration of treatment is around 10 days
+  # This suggested that an individual stays infected for is the decay rate of infected people.
+  load(paste0(case.file, ".Rdata"))
+  
+  max.week = max(case.df[,date.time.field][!is.na(case.df[,date.time.field])])
+  min.week = min(case.df[,date.time.field][!is.na(case.df[,date.time.field])])
+  n.weeks = max.week - min.week + 1
+  
+  xy.list=list()
+  tmp = vector(mode = 'numeric', length=n.weeks)
+  for (tau in min.week:max.week){
+    idx = case.df[,date.time.field] <= tau
+    if(any(idx)){
+      value = sum(
+        # truncnorm::dtruncnorm(case.df[idx,date.time.field], mean=tau, sd=d, b=tau)
+        dexp(-(case.df[idx,date.time.field] - tau), rate=d)
+      )
+    }else{
+      value=1
+    }
+
+    id = tau - min.week + 1
+    tmp[id] = value
+  }
+  for (emmtype in emmtypes){
+    tmp2 = vector(mode = 'numeric', length=n.weeks)
+    for (tau in min.week:max.week){
+      idx = (case.df[,date.time.field] <= tau) & (case.df$emmtype == emmtype)
+      if(any(idx)){
+        value = sum(
+          # truncnorm::dtruncnorm(case.df[idx,date.time.field], mean=tau, sd=sd, b=tau)
+          dexp(-(case.df[idx,date.time.field] - tau), rate=d)
+        )        
+      }else{
+        value = 0 
+      }
+      id = tau - min.week + 1
+      tmp2[id] = value
+    }
+    names(tmp2) = as.character(min.week:max.week)
+    xy.list[[emmtype]] = tmp2 / tmp
+    attributes(xy.list)$total = tmp
+  }
+  return(xy.list)
+}
