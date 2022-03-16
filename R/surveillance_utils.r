@@ -77,13 +77,12 @@ f_radia_and_heights_<-function(baseline.tab, heights=1:100){
 #' @return A \code(data.frame).
 #' @examples
 #' cylinders=rcylinder(10, observation.matrix, time.range, radia_and_heights, postcode2coord)
-rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heights, postcode2coord){
+rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heights, postcode2coord, only.last=F){
   if (any(rownames(observation.matrix)=='NA')){
     cat("WARNING: any(rownames(observation.matrix)=='NA'")
   }
   cols = as.character(time.range[1]:time.range[2])
   cases = which(observation.matrix[, cols] > 0, arr.ind = T)
-
   # cases is of the form:
   #           row col
   # PL15 9NE 5851 231
@@ -96,11 +95,10 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
     # t = cases[idx,2] + time.range[1] - 1
     # print(head(t))
     t = as.integer(colnames(observation.matrix[,cols])[cases[idx,2]])
-    # print(head(t))
     # radia and heights are given as input in the matrix radia_and_heights
 
     radia_and_heights = radia_and_heights[sample(1:nrow(radia_and_heights), n.cylinders, replace=T),]
-    #randomise wilst keeping same radius and height and avoiding negative t
+    # randomise wilst keeping same radius and height and avoiding negative t
     rho = radia_and_heights[, 2]
     random_radia = runif(n.cylinders, 0, rho)
     theta = runif(n.cylinders, 0, 2* pi)
@@ -109,11 +107,20 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
     x = x + cos(theta) * random_radia
     tt = t + runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2)
     
-    t.low = floor(tt - radia_and_heights[,1] / 2)
-    t.min = as.integer(time.range[1])
-
-    t.upp = ceiling(tt + radia_and_heights[,1] / 2)
+   if (only.last){
+      t.upp = as.integer(time.range[2])
+    }else{
+      t.upp = ceiling(tt + radia_and_heights[,1] / 2)
+    }
     t.max = as.integer(time.range[2])
+    
+    if (only.last){
+      t.low = floor(t.upp - radia_and_heights[,1])
+      t.low = ifelse(t < t.low, t, t.low)
+    }else{
+      t.low = floor(tt - radia_and_heights[,1] / 2)
+    }
+    t.min = as.integer(time.range[1])
     
     t.low = ifelse(t.low >= t.min, t.low, t.min)
     t.upp = ifelse(t.upp <= t.max, t.upp, t.max)
@@ -321,4 +328,29 @@ warning.score<-function(case, cylinders, date.time.field = 'week'){
   } 
   return(re)
 }
+
+
+warning.score2 <-function(case, TT, cylinders) {
+  
+  x = as.numeric(case['x'])
+  y = as.numeric(case['y'])
+
+  d = sqrt((cylinders$x - x)^2 + (cylinders$y - y)^2)
+  in_circle = as.integer(d <= cylinders$rho)
+  in_cylinder_height = as.integer((cylinders$t.low <= TT) & (cylinders$t.upp >= TT))
+  
+  # number of cylinders that include geo-coordinate of `case`
+  in_cylinder = sum(in_circle * in_cylinder_height, na.rm=T)
+  if (in_cylinder>0){
+    # number of cylinder with `warning` flag that include location `i`
+    warning = sum(cylinders$warning * in_circle * in_cylinder_height, na.rm=T)
+    re = warning / in_cylinder
+  }else{
+    re = 0
+  } 
+  return(re)
+}
+
+
+
 

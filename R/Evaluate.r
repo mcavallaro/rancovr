@@ -19,15 +19,18 @@
 CreateCylinders<-function(observation.matrix, baseline, week.range,
                           n.cylinders=1000,
                           p.val.threshold=0.05,
-                          size_factor=1){
+                          size_factor=1, coord.df=NULL, only.last=FALSE){
   
-  # load("~/Documents/Rancovr/Data/postcode2coord.RData")  
-  coord.df = PostcodeMap(observation.matrix)
+  # load("~/Documents/Rancovr/Data/postcode2coord.RData")
+  if (is.null(coord.df)){
+    coord.df = PostcodeMap(observation.matrix)
+  }
   #postcode2coord
   test = all(dim(baseline) == dim(observation.matrix))
   if (test){
     baseline = baseline[!(rownames(baseline) == 'NA'),]
     baseline = baseline[,!(colnames(baseline) == 'NA')]
+
     radia_and_heights = f_radia_and_heights(baseline, 1:24) * size_factor    
     if (sum(baseline) > 2 * sum(observation.matrix)){
       print(sum(baseline))
@@ -60,7 +63,6 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
   #   as.integer(week.range)) + 1 - min(as.integer(colnames(observation.matrix))
   #   )
 
-
   cat("Evaluating cylinder exceedances from ",
         as.character(week2Date(week.range[1])),   # this interactive output doesnt work in the prospective mode
         " to ",
@@ -70,8 +72,7 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
   # print(week.range)
   # week.range = week.range + 2 - min(as.integer(colnames(observation.matrix)), na.rm=T)
 
-  cylinders = rcylinder(n.cylinders, observation.matrix, week.range, radia_and_heights, coord.km.df)
-
+  cylinders = rcylinder(n.cylinders, observation.matrix, week.range, radia_and_heights, coord.km.df, only.last)
 #  print(any(cylinders$t.low == cylinders$t.upp))
   if (NROW(cylinders) > 0){
     if (test){
