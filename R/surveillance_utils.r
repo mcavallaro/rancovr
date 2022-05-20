@@ -129,8 +129,41 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
     # isx = (t.low == t.upp)
     # if (any(isx)){
     #   print(c(t.low[isx], t.upp[isx]))
-    # }   
+    # }
+
+    # QUESTO FUNZIONA:
+    # t = cases[idx,2] + week.range[1] - 1
+    # # radia and heights are given as input in the matrix radia_and_heights
+
+    # radia_and_heights = radia_and_heights[sample(1:nrow(radia_and_heights), n.cylinders, replace=T),]
+    # #randomise wilst keeping same radius and height and avoiding negative t
+    # rho = radia_and_heights[,2]
     
+    # random_radia = runif(n.cylinders, 0, rho)
+    # theta = runif(n.cylinders, 0, 2* pi)
+
+    # y = yy + sin(theta) * random_radia
+    # x = xx + cos(theta) * random_radia
+    # tt = as.integer(t)
+    # # t = t + round(runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2))
+    # v.sample.int<-Vectorize(sample.int, 'n')
+    # rrr = v.sample.int(as.integer(radia_and_heights[,1]) + 1, 1) - 1
+    # t.low = tt - rrr
+    # t.upp = t.low + as.integer(radia_and_heights[,1])
+    # # t.low = t - round(radia_and_heights[,1] / 2)
+    # t.min = as.integer(week.range[1])
+    # t.max = as.integer(week.range[2])
+    
+    # t.upp = ifelse(t.low > t.min, t.upp, t.upp + (t.min - t.low))    
+    # t.low = ifelse(t.low > t.min, t.low, t.min)
+    
+    # t.low = ifelse(t.upp < t.max, t.low, t.low - (t.upp - t.max) )
+    # t.upp = ifelse(t.upp < t.max, t.upp, t.max)
+    
+    # # t.low = as.integer(ifelse( !(t.low == t.min) & (t.low == t.upp), t.low - 1, t.low))
+    # t.low = as.integer(ifelse( (t.upp==t.max) & (t.low < t.min), t.min, t.low))
+
+
     return(data.frame(x=x, y=y, rho=rho, t.low=t.low, t.upp=t.upp))
   }else{
     return(data.frame(x=double(), y=double(), rho=double(), t.low=integer(), t.upp=integer()))    
