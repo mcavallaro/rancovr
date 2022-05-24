@@ -5,6 +5,7 @@ save.and.tell<-function(variable.string, file=file.name){
   writeLines(sprintf('Load on memory with `load("%s", verbose=1)`.', file))  
 }
 
+v.sample.int<-Vectorize(sample.int, 'n')
 
 split<-function(x){
   y = strsplit(x, ' ')[[1]]
