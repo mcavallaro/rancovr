@@ -1,4 +1,18 @@
 
+distance.between.points<-function(x,y, n.neighbours=10){
+  n.rows = length(x)
+  n.cols = length(y)
+  M = c()
+  # M = matrix(NA, ncol = n.cols, nrow=n.rows)
+  for (i in 1:n.rows){
+    d = sqrt((x[i]-x)^2 + (y[i]-y)^2)
+    # M[,i] = d
+    d = sort(d)[1:n.neighbours]
+    M = c(M, d)
+  }
+  return(quantile(M, 0.95))
+}
+
 
 #' Find optimal radia
 #'
@@ -12,20 +26,63 @@
 #' @return A \code{Matrix}.
 #' @examples
 #' radia_and_heights = f_radia_and_heights(baseline.matrix, 1:10)
-f_radia_and_heights<-function(baseline.matrix, heigths=1:100){
-  n.heigths = ncol(baseline.matrix)
-  mean.baseline = mean(baseline.matrix[, 1:n.heigths])
-  # R = 3959 # earth radius in miles
-  # lat1 = min(postcode2coord$latitude)
-  # lat2 = max(postcode2coord$latitude)
-  # lon1 = min(postcode2coord$longitude)
-  # lon2 = max(postcode2coord$longitude)
-  # total.area = (pi / 180) * R * R  * abs(sin(lat1)-sin(lat2)) * abs(lon1-lon2)
+f_radia_and_heights<-function(baseline.matrix, heigths=1:100, target.n.event, coord.df){
   total.area = 130279 # total area of England in km2s
-  n.points = nrow(baseline.matrix)
-  mean.spatial.baseline = mean.baseline * n.points / total.area
-  # we want A such that A * mean.spatial.baseline=1,  A * mean.spatial.baseline=1/2,  A * mean.spatial.baseline=1/3, etc
-  radia = sapply(heigths, function(x){sqrt(1 / mean.spatial.baseline / pi / x)} )
+  # R = 3959 # earth radius in miles
+  if(T){
+    coordinates = vlatlong2km(coord.df[,c('latitude', 'longitude')])
+  }
+  else{
+    coordinates = coord.df[,c('y', 'x')]
+  }
+  rho = distance.between.points(coordinates[,'x'], coordinates[,'y']) 
+  print(sprintf("Reference distance is %f", rho))
+  # a=diff(range(coordinates[,1], na.rm=T)) 
+  # b=diff(range(coordinates[,2], na.rm=T)) 
+  # total.area = a * b
+  # total.n.events = sum(baseline.matrix, na.rm=T)
+  # total.volume = total.area * ncol(baseline.matrix)
+  # mean.baseline = mean(baseline.matrix, na.rm = T)
+  # V = total.volume / total.n.events * target.n.event
+  V = pi * rho^2
+  radia = sapply(heigths, function(h){sqrt( V / pi / h)} )
+  ret = cbind(heigths, radia)
+  colnames(ret) = c('heights','radia')
+  return(ret)
+}
+
+
+
+#' Find optimal radia
+#'
+#' This function compute the optimal cylinder radia, such that the corresponding
+#' cylinders contain one event in average 
+#' for the chosen N heights (\code{heights}) and a given \code{baseline.matrix}.
+#' It returns an Nx2 \code{Matrix} whose first column contains the heights and 
+#' and the second column contains the corresponding radia.
+#' @param baseline.matrix A \code{Matrix} enconding the baseline. 
+#' @param heigths \code{integer}. 
+#' @return A \code{Matrix}.
+#' @examples
+#' radia_and_heights = f_radia_and_heights(baseline.matrix, 1:10)
+f_radia_and_heights.<-function(baseline.matrix, heigths=1:100, target.n.event, coord.df){
+  total.area = 130279 # total area of England in km2s
+  # R = 3959 # earth radius in miles
+  # if(T){
+  #   coordinates = vlatlong2km(coord.df[,c('latitude', 'longitude')])
+  # }
+  # else{
+  #   coordinates = coord.df[,c('y', 'x')]
+  # }
+  # a=diff(range(coordinates[,1], na.rm=T)) 
+  # b=diff(range(coordinates[,2], na.rm=T)) 
+  # total.area = a * b
+  # total.n.events = sum(baseline.matrix, na.rm=T)
+  total.volume = total.area * ncol(baseline.matrix)
+  mean.baseline = mean(baseline.matrix, na.rm = T)
+  # V = total.volume / total.n.events * target.n.event
+  V = target.n.event / mean.baseline
+  radia = sapply(heigths, function(h){sqrt( V / pi / h)} )
   ret = cbind(heigths, radia)
   colnames(ret) = c('heights','radia')
   return(ret)
@@ -72,6 +129,7 @@ f_radia_and_heights_<-function(baseline.tab, heights=1:100){
 #' @param time.range An \code{integer} vector.
 #' @param radia_and_heights A \code{Matrix}.
 #' @param postcode2coord A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.
+#' @param only.last A \code{bool}; true if all cylinders must include the last time point (\code{time.range[2]}). For prospective analysis.
 #' @importFrom truncnorm rtruncnorm
 #' @import Matrix
 #' @return A \code(data.frame).
@@ -81,45 +139,58 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
   if (any(rownames(observation.matrix)=='NA')){
     cat("WARNING: any(rownames(observation.matrix)=='NA'")
   }
-  cols = as.character(time.range[1]:time.range[2])
+  if (only.last){
+    cols = as.character(time.range[2])
+  }else{
+    cols = as.character(time.range[1]:time.range[2])
+  }
   cases = which(observation.matrix[, cols] > 0, arr.ind = T)
   # cases is of the form:
   #           row col
   # PL15 9NE 5851 231
   # SY11 3PN 6370 255
   if (sum(observation.matrix[, cols]) > 0){
-    idx = sample(1:nrow(cases), n.cylinders, replace = T)
-    y = postcode2coord[cases[idx, 1], 'y']
-    x = postcode2coord[cases[idx, 1], 'x']
-    
+    idx = sample(1:NROW(cases), n.cylinders, replace = T)
+    if (is.matrix(cases)){
+      idx_row = cases[idx, 1]
+      idx_col = cases[idx, 2]
+    }else{
+      idx_row = cases[idx]
+      idx_col = T
+    }
+    y = postcode2coord[idx_row, 'y']
+    x = postcode2coord[idx_row, 'x']
     # t = cases[idx,2] + time.range[1] - 1
     # print(head(t))
-    t = as.integer(colnames(observation.matrix[,cols])[cases[idx,2]])
+    tt = as.integer(colnames(observation.matrix[,cols])[idx_col])
+
     # radia and heights are given as input in the matrix radia_and_heights
 
     radia_and_heights = radia_and_heights[sample(1:nrow(radia_and_heights), n.cylinders, replace=T),]
-    # randomise wilst keeping same radius and height and avoiding negative t
+    # randomise whilst keeping same radius and height and avoiding negative t
     rho = radia_and_heights[, 2]
     random_radia = runif(n.cylinders, 0, rho)
     theta = runif(n.cylinders, 0, 2* pi)
-
     y = y + sin(theta) * random_radia
     x = x + cos(theta) * random_radia
-
-
-    tt = as.integer(t)
-    rrr = v.sample.int(as.integer(radia_and_heights[,1]) + 1, 1) - 1
-    t.low = tt - rrr
-    t.upp = t.low + as.integer(radia_and_heights[,1])
+    
     t.min = as.integer(time.range[1])
     t.max = as.integer(time.range[2])
-    t.upp = ifelse(t.low > t.min, t.upp, t.upp + (t.min - t.low))    
-    t.low = ifelse(t.low > t.min, t.low, t.min)
-    t.low = ifelse(t.upp < t.max, t.low, t.low - (t.upp - t.max) )
-    t.upp = ifelse(t.upp < t.max, t.upp, t.max)
-    t.low = as.integer(ifelse( (t.upp==t.max) & (t.low < t.min), t.min, t.low))
-
-
+    
+    if(only.last){
+      t.upp = rep(t.max, length(x))
+      t.low = t.upp - as.integer(radia_and_heights[,1])
+      t.low = ifelse(t.low < t.min, t.min, t.low)
+    }else{
+      rrr = v.sample.int(as.integer(radia_and_heights[,1]) + 1, 1) - 1
+      t.low = tt - rrr
+      t.upp = t.low + as.integer(radia_and_heights[,1])
+      t.upp = ifelse(t.low > t.min, t.upp, t.upp + (t.min - t.low))    
+      t.low = ifelse(t.low > t.min, t.low, t.min)
+      t.low = ifelse(t.upp < t.max, t.low, t.low - (t.upp - t.max) )
+      t.upp = ifelse(t.upp < t.max, t.upp, t.max)
+      t.low = as.integer(ifelse( (t.upp==t.max) & (t.low < t.min), t.min, t.low))      
+    }
     # tt = t + runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2)
     # if (only.last){
     #   t.upp = as.integer(time.range[2])
@@ -175,7 +246,6 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
     
     # # # t.low = as.integer(ifelse( !(t.low == t.min) & (t.low == t.upp), t.low - 1, t.low))
     # # t.low = as.integer(ifelse( (t.upp==t.max) & (t.low < t.min), t.min, t.low))
-
 
     return(data.frame(x=x, y=y, rho=rho, t.low=t.low, t.upp=t.upp))
   }else{
@@ -288,12 +358,6 @@ warning_ratio<-function(i, observation.matrix, cylinders, postcode.locations){
   x = as.numeric(postcode.locations[i, 'longitude'])
   y = as.numeric(postcode.locations[i, 'latitude'])
   
-  ## da vettorizzare
-  # in_circle = apply(cylinders, 1, function(X){
-  #   ifelse(sqrt((as.numeric(X['x']) - x)^2 + (as.numeric(X['y']) - y)^2) < as.numeric(X['rho']), TRUE, FALSE)
-  # })
-  
-  # vettorizzato
   in_circle = sqrt((as.numeric(cylinders['x']) - x)^2 + (as.numeric(cylinders['y']) - y)^2) < as.numeric(cylinders['rho'])
   
   times = which(observation.matrix[i,] > 0)
@@ -390,9 +454,9 @@ warning.score2 <-function(case, TT, cylinders) {
   if (in_cylinder>0){
     # number of cylinder with `warning` flag that include location `i`
     warning = sum(cylinders$warning * in_circle * in_cylinder_height, na.rm=T)
-    re = warning / in_cylinder
+    re = c(warning / in_cylinder,in_cylinder)
   }else{
-    re = 0
+    re = c(0, 0)
   } 
   return(re)
 }

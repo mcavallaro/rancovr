@@ -19,19 +19,22 @@
 CreateCylinders<-function(observation.matrix, baseline, week.range,
                           n.cylinders=1000,
                           p.val.threshold=0.05,
-                          size_factor=1, coord.df=NULL, only.last=FALSE){
+                          size_factor=1, coord.df=NULL, GT=24, only.last=FALSE){
   
   # load("~/Documents/Rancovr/Data/postcode2coord.RData")
   if (is.null(coord.df)){
     coord.df = PostcodeMap(observation.matrix)
   }
+  week.range = range(as.integer(week.range))
+  
   #postcode2coord
   test = all(dim(baseline) == dim(observation.matrix))
   if (test){
     baseline = baseline[!(rownames(baseline) == 'NA'),]
     baseline = baseline[,!(colnames(baseline) == 'NA')]
 
-    radia_and_heights = f_radia_and_heights(baseline, 1:24) * size_factor    
+    radia_and_heights = f_radia_and_heights(baseline[,week.range[1]:week.range[2]], 1:GT, size_factor, coord.df)
+
     if (sum(baseline) > 2 * sum(observation.matrix)){
       print(sum(baseline))
       print(sum(observation.matrix))    
@@ -52,28 +55,20 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
   coord.df = coord.df[!is.na(coord.df$latitude),]
   coord.km.df = coord.df
   coord.km.df[,c('y','x')]= vlatlong2km(coord.df[,c("latitude","longitude")])
-  week.range = range(as.integer(week.range))
+  
   if ((week.range[1] < min(as.integer(colnames(observation.matrix)))) | (week.range[2] > max(as.integer(colnames(observation.matrix))))){
     A = sprintf("%d-%d", week.range[1], week.range[2])
     B = range(as.integer(colnames(observation.matrix)))
     B = sprintf("%d-%d", B[1], B[2])
     stop(paste0("`week.range`` is ", A, ", while the range of `observation.matrix` is ", B, "." ))
   }
-  # week.range = range(
-  #   as.integer(week.range)) + 1 - min(as.integer(colnames(observation.matrix))
-  #   )
-
   cat("Evaluating cylinder exceedances from ",
         as.character(week2Date(week.range[1])),   # this interactive output doesnt work in the prospective mode
         " to ",
         as.character(week2Date(week.range[2])), ".\n")
   
-  # # generate cylinders
-  # print(week.range)
-  # week.range = week.range + 2 - min(as.integer(colnames(observation.matrix)), na.rm=T)
-
+  # generate cylinders
   cylinders = rcylinder(n.cylinders, observation.matrix, week.range, radia_and_heights, coord.km.df, only.last)
-#  print(any(cylinders$t.low == cylinders$t.upp))
   if (NROW(cylinders) > 0){
     if (test){
       tmp = t(apply(cylinders, 1, compute, observation.matrix, baseline, coord.km.df))

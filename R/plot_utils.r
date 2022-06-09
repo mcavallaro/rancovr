@@ -24,6 +24,7 @@ plotCases<-function(observation.matrix, week.range, postcode.locations, col='#ff
 }
 
 plotCylinders<-function(cylinders, color="#3182bd99",lwd=0.1){ #'#ffebeb88'
+  library(spatstat.geom)
   for(i in 1:nrow(cylinders)){
     plot.owin(disc(cylinders$rho[i], c(cylinders$x[i],cylinders$y[i])), add=TRUE, col=NA, lwd=lwd, border=color)
   }
