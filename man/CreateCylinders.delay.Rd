@@ -17,13 +17,15 @@ CreateCylinders.delay(
   n.cylinders = 1000,
   p.val.threshold = 0.05,
   coord.df = postcode2coord,
-  size_factor = 1
+  GT = 24,
+  size_factor = 1,
+  rho
 )
 }
 \arguments{
 \item{observation.matrix.untyped}{A 2D matrix.}
 
-\item{baseline.matrix.untyped}{A 2dD matrix.}
+\item{baseline.matrix.untyped}{A 2D matrix.}
 
 \item{week.range}{A \code{numeric} vector to set the lower and upper limit to the heigh of the cylinders.}
 

@@ -14,7 +14,6 @@
 #                "emm gene type")
 #       case.df = case.df[, nomi]
 #       
-#       case.df['emmtype'] = apply(case.df['emm gene type'], 1, FUN=split)
 #       case.df['emmtype'] = apply(case.df['emmtype'], 1, FUN=function(x){strsplit(x, '\r')[[1]][1]})
 #       
 #       idx = case.df$`Sterile Site Y N` == "#s"
@@ -307,5 +306,77 @@
 #'   save.and.tell("observation.matrices.typed",
 #'                 file=file.path(dirname(case.file),paste0(c(emmtypes, '_typed_prospective_obs.Rdata'), collapse='')))
 #' }
+#' 
+#' 
+#' 
+#' 
+#' 
+
+
+# warning_ratio<-function(i, observation.matrix, cylinders, postcode.locations){
+#   # check if the location i
+#   x = as.numeric(postcode.locations[i, 'longitude'])
+#   y = as.numeric(postcode.locations[i, 'latitude'])
+#   
+#   in_circle = sqrt((as.numeric(cylinders['x']) - x)^2 + (as.numeric(cylinders['y']) - y)^2) < as.numeric(cylinders['rho'])
+#   
+#   times = which(observation.matrix[i,] > 0)
+# 
+#   if (length(times) > 0){
+#     in_cylinder_height = matrix(FALSE, nrow = nrow(cylinders), ncol=length(times))
+# 
+#     for (i in 1:length(times)){
+#       
+#       #da vettorizzare:
+#       in_cylinder_height[,i] = apply(cylinders, 1,  function(X){
+#         TT = as.numeric(names(times[i]))
+#         (as.numeric(X['t.low']) < TT) & (as.numeric(X['t.upp']) > TT)
+#       })
+#       
+#       
+#       # vettorizzato
+#       #TT = as.numeric(names(times[i]))
+#       #in_cylinder_height[,i] = (as.numeric(cylinders['t.low']) < TT) & (as.numeric(cylinders['t.upp']) > TT)
+# 
+#     }
+# 
+#     # number of cylinders that include locations `i`
+#     in_cylinder = sum(in_circle * in_cylinder_height)
+#     # number of cylinder with `warning` flag that include location `i`
+#     warning = sum(cylinders$warning * in_circle * in_cylinder_height)
+# 
+#     return(warning / in_cylinder)
+#   }else{
+#     return(NA)
+#   }
+# }
+# 
+# warning_ratio2<-function(i, observation.matrix, t, cylinders, postcode.locations){
+#   times = which(observation.matrix > 0)
+#   if (length(times) > 0){
+#     # check if the location is in any circle
+#     x = as.numeric(postcode.locations[i,'longitude'])
+#     y = as.numeric(postcode.locations[i,'latitude'])
+#     
+#     
+#     in_circle = apply(cylinders, 1, function(X){
+#       ifelse(sqrt((as.numeric(X['x']) - x)^2 + (as.numeric(X['y']) - y)^2) < as.numeric(X['rho']), TRUE, FALSE)
+#     })
+#     in_cylinder_height = (cylinders['t.low'] < t) & (cylinders['t.upp'] > t)
+#     # number of cylinders that include locations
+#     in_cylinder = sum(in_circle * in_cylinder_height)
+#     # number of cylinder with `warning` flag that include location `i`
+#     warning = sum(cylinders$warning * in_circle * in_cylinder_height)
+#     if (in_cylinder == 0){
+#       return(0)
+#     }else{
+#       return(warning / in_cylinder)
+#     }
+#   }else{
+#     return(0)
+#   }
+# }
+#' 
+#' 
 #' 
 #' 

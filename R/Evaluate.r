@@ -19,7 +19,9 @@
 CreateCylinders<-function(observation.matrix, baseline, week.range,
                           n.cylinders=1000,
                           p.val.threshold=0.05,
-                          size_factor=1, coord.df=NULL, GT=24, only.last=FALSE){
+                          size_factor=1,
+                          rho,
+                          coord.df=NULL, GT=24, only.last=FALSE){
   
   # load("~/Documents/Rancovr/Data/postcode2coord.RData")
   if (is.null(coord.df)){
@@ -29,11 +31,20 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
   
   #postcode2coord
   test = all(dim(baseline) == dim(observation.matrix))
+  
   if (test){
     baseline = baseline[!(rownames(baseline) == 'NA'),]
     baseline = baseline[,!(colnames(baseline) == 'NA')]
-
-    radia_and_heights = f_radia_and_heights(baseline[,week.range[1]:week.range[2]], 1:GT, size_factor, coord.df)
+    
+    if (missing(rho)){
+      # rho is a reference size (largest radius) of the cylider base.
+      # if it is missing, compute the cylinder volume heuristically
+      radii_and_heights = f_radii_and_heights2(1:GT,
+                                               baseline[,week.range[1]:week.range[2]],
+                                               size_factor)
+    }else{
+      radii_and_heights = f_radii_and_heights2(1:GT, rho = rho)
+    }
 
     if (sum(baseline) > 2 * sum(observation.matrix)){
       print(sum(baseline))
@@ -45,7 +56,7 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
       )
     }
   }else{
-    radia_and_heights = f_radia_and_heights_(baseline, 1:24) * size_factor    
+    radii_and_heights = f_radii_and_heights_(baseline, 1:GT) * size_factor    
   }
 
   observation.matrix = observation.matrix[!(rownames(observation.matrix) == 'NA'),]
@@ -62,13 +73,13 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
     B = sprintf("%d-%d", B[1], B[2])
     stop(paste0("`week.range`` is ", A, ", while the range of `observation.matrix` is ", B, "." ))
   }
-  cat("Evaluating cylinder exceedances from ",
-        as.character(week2Date(week.range[1])),   # this interactive output doesnt work in the prospective mode
-        " to ",
-        as.character(week2Date(week.range[2])), ".\n")
+  # cat("Evaluating cylinder exceedances from ",
+  #       as.character(week2Date(week.range[1])),   # this interactive output doesnt work in the prospective mode
+  #       " to ",
+  #       as.character(week2Date(week.range[2])), ".\n")
   
   # generate cylinders
-  cylinders = rcylinder(n.cylinders, observation.matrix, week.range, radia_and_heights, coord.km.df, only.last)
+  cylinders = rcylinder(n.cylinders, observation.matrix, week.range, radii_and_heights, coord.km.df, only.last)
   if (NROW(cylinders) > 0){
     if (test){
       tmp = t(apply(cylinders, 1, compute, observation.matrix, baseline, coord.km.df))
@@ -93,12 +104,15 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
 #' -1 in observation.matrix index means that we are excluding from week NA
 #' @inheritParams CreateCylinders
 #' @param observation.matrix.untyped A 2D matrix.
-#' @param baseline.matrix.untyped A 2dD matrix.
+#' @param baseline.matrix.untyped A 2D matrix.
 CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
                                 observation.matrix.untyped, baseline.matrix.untyped,
                                 emmtype,
                                 week.range, n.cylinders=1000, 
-                                p.val.threshold=0.05, coord.df=postcode2coord,  size_factor=1){
+                                p.val.threshold=0.05, coord.df=postcode2coord,
+                                GT=24,
+                                size_factor=1,
+                                rho){
   observation.matrix.typed = as.matrix(observation.matrix.typed[!(rownames(observation.matrix.typed) == 'NA'),])
   baseline.matrix.typed = as.matrix(baseline.matrix.typed[!(rownames(baseline.matrix.typed) == 'NA'),])
   observation.matrix.untyped = as.matrix(observation.matrix.untyped[!(rownames(observation.matrix.untyped) == 'NA'),])
@@ -111,7 +125,7 @@ CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
     warning("Warning: the typed baseline is very high.")
   }
   if (c2){
-    warning("Warning: the untyped baseline seems is very high.")
+    warning("Warning: the untyped baseline seems to be very high.")
   }
   init = Sys.time()
   coord.df = coord.df[!is.na(coord.df$latitude),]
@@ -129,15 +143,15 @@ CreateCylinders.delay<-function(observation.matrix.typed, baseline.matrix.typed,
   # weeks = as.integer(colnames(observation.matrix)[-seq(1:(starting.week+2))])
   # weeks = weeks[seq(1, length(weeks), 20)]
   # cylinders0 = data.frame(x=double(), y=double(), rho=double(), t.low=integer(), t.upp=integer(), n_obs=integer(), mu=double(), lower=integer(), upper=integer(), p.val=double(), warning=logical())
-  radia_and_heights = f_radia_and_heights(baseline.matrix.typed, 1:24) * size_factor
-  cat("Evaluating cylinder exceedances from ",
-      as.character(week2Date(week.range[1])),   # this interactive output doesnt work in the prospective mode
-      " to ",
-      as.character(week2Date(week.range[2])),        
-      " for emm type ", emmtype, ".\n")
-
+  if(missing(rho)){
+#    radii_and_heights = f_radii_and_heights(baseline.matrix.typed, 1:24) * size_factor
+    radii_and_heights = f_radii_and_heights2(1:GT, baseline.matrix.typed, size_factor)  
+  }else{
+    radii_and_heights = f_radii_and_heights2(1:GT, rho = rho)
+  }
+  
   # generate cylinders
-  cylinders = rcylinder(n.cylinders, observation.matrix.typed + observation.matrix.untyped, week.range, radia_and_heights, coord.km.df)
+  cylinders = rcylinder(n.cylinders, observation.matrix.typed + observation.matrix.untyped, week.range, radii_and_heights, coord.km.df)
   if (NROW(cylinders) > 0){
     cylinders[,c('n_obs.typed', 'mu.typed', 'p.val.typed')] = t(apply(cylinders, 1, compute,
                                                                 observation.matrix.typed,

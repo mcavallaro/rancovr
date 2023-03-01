@@ -49,4 +49,4 @@
 #' @import sf
 #' @format Simple feature collection.
 #' @source \url{https://osdatahub.os.uk/}
-"GB.region.boundaries"
+"GB_region_boundaries"

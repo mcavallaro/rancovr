@@ -8,26 +8,35 @@ CreateBaselineMatrix(
   case.df,
   save.on.dir = FALSE,
   date.time.field = "week",
-  postcode.field = "postcode"
+  postcode.field = "postcode",
+  more.postcodes = c(),
+  more.weeks = c()
 )
 }
 \arguments{
 \item{case.df}{A \code{data.frame} of events.}
 
-\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `baseline_matrix.Rdata` file.}
+\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `baseline_matrix.RData` file.}
 
 \item{date.time.field}{A \code{character} string.}
 
 \item{postcode.field}{A \code{character} string.}
+
+\item{more.postcodes}{A \code{character} vector of postcodes.}
+
+\item{more.weeks}{A \code{integer} vector of postcodes.}
 }
 \value{
 A \code{Matrix}.
 }
 \description{
-Compute and save on disk a 2D dense matrix representing the spatial component of the
-baseline.
+Compute and save on disk a 2D dense matrix representing the
+baseline, given a \code{data.frame} of events (\code{case.df}), where  rows represent the spatial component of the baseline
+(indexed, e.g., by postcodes) and columns represent the temporal component.
+It is possible to insert null rows corresponding to postcodes not included in \code{case.df} using \code{more.postcodes} field
+for increased accuracy.
 }
 \examples{
-baseline.matrix = CreateBaselineMatrix(case.df)
+baseline.matrix = CreateBaselineMatrix(case.df, more.postcodes=c('CV31 1LS', 'E1 3BS'))
 baseline.matrix = CreateBaselineMatrix(case.df, date.time.field = 'SAMPLE_DT_numeric', postcode.field = 'Patient Postcode')
 }

@@ -3,7 +3,7 @@
 \name{PostcodeMap}
 \alias{PostcodeMap}
 \title{Map postcodes to coordinates
-Returns and save is 'postcode2coord.Rdata' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
+Returns and save 'postcode2coord.RData' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
 \code{matrix} can be a \code{Matrix} or a \code{sparseMatrix} object storing baseline or observation data.
 Requires the all postcode data tabulated in a \code{data.frame} called \code{postcode.data} available in the workspace.}
 \usage{
@@ -17,7 +17,7 @@ A \code{data.frame}.
 }
 \description{
 Map postcodes to coordinates
-Returns and save is 'postcode2coord.Rdata' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
+Returns and save 'postcode2coord.RData' a data frame that maps the postcodes included in \code{rownames(matrix)} to geographical coordinates.
 \code{matrix} can be a \code{Matrix} or a \code{sparseMatrix} object storing baseline or observation data.
 Requires the all postcode data tabulated in a \code{data.frame} called \code{postcode.data} available in the workspace.
 }

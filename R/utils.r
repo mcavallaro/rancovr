@@ -239,3 +239,20 @@ is_in_circle<-function(Data, x, y, rho){
 }
 
 
+distance.between.points<-function(x,y, n.neighbours=10){
+  n.rows = length(x)
+  n.cols = length(y)
+  M = c()
+  # M = matrix(NA, ncol = n.cols, nrow=n.rows)
+  for (i in 1:n.rows){
+    d = sqrt((x[i]-x)^2 + (y[i]-y)^2)
+    # M[,i] = d
+    d = sort(d)[1:n.neighbours]
+    M = c(M, d)
+  }
+  ret = quantile(M, 0.95)
+  # attr(ret, which = 'IQR') = quantile(M, c(0.25,0.50,0.75))
+  return(ret)
+}
+
+

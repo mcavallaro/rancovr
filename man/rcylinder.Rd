@@ -9,7 +9,8 @@ rcylinder(
   observation.matrix,
   time.range,
   radia_and_heights,
-  postcode2coord
+  postcode2coord,
+  only.last = F
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ rcylinder(
 \item{radia_and_heights}{A \code{Matrix}.}
 
 \item{postcode2coord}{A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.}
+
+\item{only.last}{A \code{bool}; true if all cylinders must include the last time point (\code{time.range[2]}). For prospective analysis.}
 }
 \value{
 A \code(data.frame).

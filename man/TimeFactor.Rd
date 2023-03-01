@@ -16,9 +16,9 @@ TimeFactor(
 \arguments{
 \item{case.df}{A \code{data.frame} containing the events.}
 
-\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `timefactor.Rdata` file.}
+\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `timefactor.RData` file.}
 
-\item{get.from.dir}{\code{logical}. If TRUE then the vector is obtained from the `timefactor.Rdata` file.}
+\item{get.from.dir}{\code{logical}. If TRUE then the vector is obtained from the `timefactor.RData` file.}
 
 \item{date.time.field}{A \code{character} string.}
 

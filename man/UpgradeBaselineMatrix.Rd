@@ -15,7 +15,7 @@ UpgradeBaselineMatrix(
 )
 }
 \arguments{
-\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `baseline_matrix.Rdata` file.}
+\item{save.on.dir}{\code{logical}. If TRUE then the vector is saved in `baseline_matrix.RData` file.}
 
 \item{date.time.field}{A \code{character} string.}
 

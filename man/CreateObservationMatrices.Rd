@@ -8,7 +8,9 @@ CreateObservationMatrices(
   case.df,
   types = NULL,
   date.time.field = "week",
-  postcode.field = "postcode"
+  postcode.field = "postcode",
+  more.postcodes = c(),
+  more.weeks = c()
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ CreateObservationMatrices(
 \item{date.time.field}{A \code{character} string.}
 
 \item{postcode.field}{A \code{character} string.}
+
+\item{more.postcodes}{A \code{character} vector}
+
+\item{more.weeks}{A \code{integer} vector}
 }
 \value{
 None
@@ -28,7 +34,7 @@ Compute 2D Sparse matrices enconding observations recorded in \code{case.df}.
 Rows are locations (indexed by postcodes) and columns are time steps.
 If a \code{character} vector of length N is passed as argument \code{types}, then N
 matrices are created only for the events with matching \code{case.df$types}.
-The matrices are saved on disk as '*observation_matrix.Rdata' files.
+The matrices are saved on disk as '*observation_matrix.RData' files.
 }
 \examples{
 CreateObservationMatrices(case.df)

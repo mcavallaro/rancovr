@@ -13,7 +13,7 @@ cmle(data, n.cycles = 10, start = NULL, save.on.dir = TRUE)
 
 \item{start}{\code{numeric}. Starting parameters (not yet implemented).}
 
-\item{save.on.dir}{\code{logical}. If TRUE, will save the inferred parameter in `timefactor_parameters.Rdata`.}
+\item{save.on.dir}{\code{logical}. If TRUE, will save the inferred parameter in `timefactor_parameters.RData`.}
 }
 \value{
 \code{numeric}. A 2D 2x4 matrix with the estimated parameters.
