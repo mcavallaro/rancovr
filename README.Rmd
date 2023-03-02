@@ -189,5 +189,5 @@ legend('topright',c('end.','true epi.', 'w>0.95'), pch=c(20,4,1), col=c(tab.blue
 
 [1] M. Cavallaro, J. Coelho, D. Ready, V. Decraene, T. Lamagni, N. D. McCarthy, D. Todkill, M. J. Keeling (2022)
 Cluster detection with random neighbourhood covering: Application to invasive Group A Streptococcal disease. PLoS Comput Biol 18(11): e1010726.
-https://doi.org/10.1371/journal.pbci.1010726
+https://doi.org/10.1371/journal.pcbi.1010726
 

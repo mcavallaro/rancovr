@@ -130,19 +130,26 @@ cylinders = CreateCylinders(observation.matrix, baseline.matrix, week.range = c(
     ## Loading objects:
     ##   postcode2coord
     ## Using data loaded from `postcode2coord.RData`
-    ## Time difference of 1.860501 mins
+    ## Time difference of 2.711282 mins
 
 ``` r
 head(cylinders)
 ```
 
-    ##            x        y      rho t.low t.upp n_obs         mu     p.val warning
-    ## 1  -4.029426 5725.620 7.358866    52    68    48 68.1715332 0.9957064   FALSE
-    ## 2   3.555001 5730.511 8.163928    69    82    30 37.8589987 0.9170454   FALSE
-    ## 3 -93.948032 5728.697 8.875126    86    97     6  4.4450999 0.2877209   FALSE
-    ## 4 -81.656709 5934.709 7.358866    16    32     7  6.7911243 0.5187256   FALSE
-    ## 5 -83.854503 6023.165 6.938005     5    23     2  0.7122419 0.1600714   FALSE
-    ## 6 -75.820322 5833.160 8.163928    40    53     1  3.3078229 0.9634042   FALSE
+    ##             x        y      rho t.low t.upp n_obs         mu        p.val
+    ## 1  -67.146412 5769.807 8.163869    73    86     4  1.4463302 5.908811e-02
+    ## 2  -48.661207 5657.672 6.752909    16    35     6  4.9730974 3.793189e-01
+    ## 3   -6.483721 5755.764 8.497225    45    57    52  7.1205952 2.478737e-27
+    ## 4    4.666002 5739.594 8.497225    51    63    30 28.9189980 4.448458e-01
+    ## 5  -82.407466 6106.174 9.811750    11    20     1  0.8217982 5.603596e-01
+    ## 6 -202.852164 5593.081 8.497225    51    63     4  1.4597384 6.069135e-02
+    ##   warning
+    ## 1   FALSE
+    ## 2   FALSE
+    ## 3    TRUE
+    ## 4   FALSE
+    ## 5   FALSE
+    ## 6   FALSE
 
 Some cylinders contain much more cases than the baseline predicts. These
 cylinders cover epidemic (outbreak) events.
@@ -218,19 +225,19 @@ cylinders.2 = CreateCylinders(observation.matrix, baseline_for_sim, week.range =
     ## Data loaded from `postcode2coord.RData` is for a different matrix and will be overwritten by the map for the current matrix.
     ## The variable `postcode2coord` has been saved on disk in file `/home/massimo/Documents/rancovr/postcode2coord.RData`.
     ## Load on memory with `load("/home/massimo/Documents/rancovr/postcode2coord.RData", verbose=1)`.
-    ## Time difference of 3.149846 mins
+    ## Time difference of 4.289573 mins
 
 ``` r
 head(cylinders.2)
 ```
 
-    ##            x        y      rho t.low t.upp n_obs        mu      p.val warning
-    ## 1  -4.565732 5782.775 14.56173    66    78     7  5.230448 0.27222953   FALSE
-    ## 2 -39.431829 6112.945 13.99046    12    25    27 17.817712 0.02536801    TRUE
-    ## 3 -89.611223 5979.242 16.81444    56    65    12  9.115878 0.20837666   FALSE
-    ## 4 -67.432738 5837.926 16.81444    17    26    19 23.455035 0.84773404   FALSE
-    ## 5  -2.764860 5740.000 12.61083    10    26    69 79.836310 0.89999698   FALSE
-    ## 6 -45.162555 5864.023 11.57249    17    36    13  8.069146 0.06718268   FALSE
+    ##             x        y      rho t.low t.upp n_obs        mu       p.val warning
+    ## 1    6.678267 5739.376 11.57249    61    80    69 50.048042 0.006371698    TRUE
+    ## 2  -61.256464 5990.645 29.12347    13    16    18 14.994925 0.250711342   FALSE
+    ## 3  -39.164635 5993.963 14.56173    34    46     9  7.299818 0.310751009   FALSE
+    ## 4  -80.617268 5957.438 15.20923    88    99    14 15.389119 0.672984536   FALSE
+    ## 5  -53.665732 5691.094 17.83441    14    22     3  2.850717 0.542547486   FALSE
+    ## 6 -139.710085 5747.082 10.29670    57    81     8  8.312945 0.589804564   FALSE
 
 ``` r
 plotCylindersCI(cylinders.2, confidence.level = 0.95)
@@ -254,12 +261,12 @@ head(simulation_data)
     ## 5  AL100DR   47         64 epi.    1 51.76370 -0.2360576  AL100DR    64
     ## 6  AL100DR   51         64 epi.    1 51.76370 -0.2360576  AL100DR    64
     ##          y         x warning.score warning.score.2
-    ## 1 5756.180 -8.074648     0.8916479       0.8492063
-    ## 2 5756.180 -8.074648     0.8717340       0.7913043
-    ## 3 5756.180 -8.074648     0.9716216       0.9369658
-    ## 4 5756.123 -8.254003     0.9852744       0.9680511
-    ## 5 5756.123 -8.254003     0.9869754       0.9783105
-    ## 6 5756.123 -8.254003     0.9744624       0.9368984
+    ## 1 5756.180 -8.074648     0.8711019       0.8396465
+    ## 2 5756.180 -8.074648     0.8900256       0.7675676
+    ## 3 5756.180 -8.074648     0.9727149       0.9410526
+    ## 4 5756.123 -8.254003     0.9842932       0.9739312
+    ## 5 5756.123 -8.254003     0.9815603       0.9662542
+    ## 6 5756.123 -8.254003     0.9744280       0.9413613
 
 Assess concordance with ROC-AUC:
 
@@ -289,7 +296,7 @@ plot(ROC)
 print(ROC$auc)
 ```
 
-    ## Area under the curve: 0.9997
+    ## Area under the curve: 0.9993
 
 ``` r
 ROC = roc(ifelse(simulation_data$sim == 'end.', FALSE, TRUE), simulation_data$warning.score.2)
@@ -319,14 +326,14 @@ simulation_data$sqerr = (simulation_data$Y - simulation_data$warning.score)^2
 cat("MSE using estimated baseline:", mean(simulation_data$sqerr), '\n') 
 ```
 
-    ## MSE using estimated baseline: 0.02540727
+    ## MSE using estimated baseline: 0.02625492
 
 ``` r
 simulation_data$sqerr.2 = (simulation_data$Y - simulation_data$warning.score.2)^2
 cat("MSE using true baseline:", mean(simulation_data$sqerr.2), '\n') 
 ```
 
-    ## MSE using true baseline: 0.03199637
+    ## MSE using true baseline: 0.0318318
 
 And with a map:
 
@@ -375,4 +382,4 @@ legend('topright',c('end.','true epi.', 'w>0.95'), pch=c(20,4,1), col=c(tab.blue
 McCarthy, D. Todkill, M. J. Keeling (2022) Cluster detection with random
 neighbourhood covering: Application to invasive Group A Streptococcal
 disease. PLoS Comput Biol 18(11): e1010726.
-<https://doi.org/10.1371/journal.pbci.1010726>
+<https://doi.org/10.1371/journal.pcbi.1010726>
