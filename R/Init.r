@@ -11,7 +11,7 @@
 #' Clean("33.0_observation_matrix_tmp")
 #' Clean("observation_matrix_tmp")
 Clean<-function(basename){
-  list_files = list.files('Data',pattern = paste0(basename, '.RData'))
+  list_files = list.files('Data', pattern = paste0(basename, '.RData'))
   for (file in list_files){
     file.remove(file.path("Data", file))
   }
@@ -150,6 +150,8 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
     }    
     
     postcode2coord['key'] = NULL
+    postcode2coord[,c('y', 'x')] = vlatlong2km(postcode2coord[,c('latitude', 'longitude')])
+
     save.and.tell('postcode2coord', file=file.path(getwd(),
                                                    paste0("postcode2coord.RData")))
 
@@ -158,6 +160,8 @@ PostcodeMap<-function(matrix, postcode.field = 'postcode'){
   )
   return(ret)
 }
+
+
 
 
 #' Find temporal component of the baseline
