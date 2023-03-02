@@ -1,10 +1,10 @@
 # Rancovr: Cluster detection in R with Random Neighbourhood Covering
 
-`rancovr` is a statistical software package written in R for the
-detection of disease clusters. It implements the Random Neighbourhood
+`rancovr` is a statistical software package written in R for disease
+cluster and anomaly detection. It implements the Random Neighbourhood
 Covering (RaNCover) approach of reference \[1\]. RaNCover assigns a
 score *w* ∈ \[0, 1\] to each records. A high score suggests that the
-record is likely to be part of a cluster (e.g., and infection case
+record is likely to be part of a cluster (e.g., it is an infection case
 caused by a local outbreak), while a low score suggests that the record
 is consistent with a baseline of sporadic cases.
 
@@ -13,11 +13,12 @@ install.packages("devtools")
 devtools::install_github("mcavallaro/rancovr")
 ```
 
-As a demonstration, we consider the spatio-temporal coordinates stored
-in `Data/synthetic_dataset.csv`. These represent records of infection
-cases, obtained aggregating data simulated from an endemic component
-(`end.`) and from an outbreak (`epi.`) in England. See also reference
-\[1\] for simulation details.
+As a demonstration, we consider the spatio-temporal coordinates in
+`Data/synthetic_dataset.csv`. The entries of this data set represent
+(simulated) locations and detection dates of infected patients generated
+by an endemic disease (`end.`) and cases due to a local outbreak
+(`epi.`) in England. See also reference \[1\] for the simulation
+details.
 
 ``` r
 data("simulation_data")
@@ -60,11 +61,11 @@ CreateObservationMatrices(simulation_data)
     ## The variable `observation.matrix` has been saved on disk in file `/home/massimo/Documents/rancovr/observation_matrix.RData`.
     ## Load on memory with `load("/home/massimo/Documents/rancovr/observation_matrix.RData", verbose=1)`.
 
-Observations must be compared with an appropriate baseline model. If
-their number significantly exceeded the model prediction, an outbreak
-might be occurring. Estimating the baseline involves finding a temporal
-trend (using the function `TimeFactor`) and a spatial trend based on the
-spatial population distribution.
+Observations must be compared with an appropriate baseline model. If the
+numbers of these observations significantly exceeded the model
+prediction, an outbreak might be occurring. Estimating the baseline
+involves finding a temporal trend (using the function `TimeFactor`) and
+a spatial trend based on the spatial population distribution.
 
 ``` r
 load(file.path(getwd(), "observation_matrix.RData"), verbose=1)
@@ -129,30 +130,22 @@ cylinders = CreateCylinders(observation.matrix, baseline.matrix, week.range = c(
     ## Loading objects:
     ##   postcode2coord
     ## Using data loaded from `postcode2coord.RData`
-    ## Evaluating cylinder exceedances from  01/01/15  to  24/11/16 .
-    ## Time difference of 1.62046 mins
+    ## Time difference of 1.860501 mins
 
 ``` r
 head(cylinders)
 ```
 
-    ##             x        y       rho t.low t.upp n_obs         mu      p.val
-    ## 1   -9.512553 5720.063 14.311616    21    26    40 34.5261054 0.19624700
-    ## 2  -13.733509 5807.403  7.155808     0    12     1  0.7111017 0.50889716
-    ## 3 -134.616336 5623.578  6.746561    52    71     4  1.5466504 0.07163341
-    ## 4  -63.364792 5837.851  5.968356    48    72    26 29.5764845 0.76923125
-    ## 5  -91.143168 5730.355  6.246101     3    25     7  6.0378388 0.39977477
-    ## 6  -44.871282 6112.868  6.102494    14    37    18 11.6333849 0.04996999
-    ##   warning
-    ## 1   FALSE
-    ## 2   FALSE
-    ## 3   FALSE
-    ## 4   FALSE
-    ## 5   FALSE
-    ## 6    TRUE
+    ##            x        y      rho t.low t.upp n_obs         mu     p.val warning
+    ## 1  -4.029426 5725.620 7.358866    52    68    48 68.1715332 0.9957064   FALSE
+    ## 2   3.555001 5730.511 8.163928    69    82    30 37.8589987 0.9170454   FALSE
+    ## 3 -93.948032 5728.697 8.875126    86    97     6  4.4450999 0.2877209   FALSE
+    ## 4 -81.656709 5934.709 7.358866    16    32     7  6.7911243 0.5187256   FALSE
+    ## 5 -83.854503 6023.165 6.938005     5    23     2  0.7122419 0.1600714   FALSE
+    ## 6 -75.820322 5833.160 8.163928    40    53     1  3.3078229 0.9634042   FALSE
 
-Some cylinders contain much more cases than the baseline expectation.
-Such cylinders cover epidemic event.
+Some cylinders contain much more cases than the baseline predicts. These
+cylinders cover epidemic (outbreak) events.
 
 ``` r
 plotCylindersCI(cylinders, confidence.level = 0.95)
@@ -225,27 +218,19 @@ cylinders.2 = CreateCylinders(observation.matrix, baseline_for_sim, week.range =
     ## Data loaded from `postcode2coord.RData` is for a different matrix and will be overwritten by the map for the current matrix.
     ## The variable `postcode2coord` has been saved on disk in file `/home/massimo/Documents/rancovr/postcode2coord.RData`.
     ## Load on memory with `load("/home/massimo/Documents/rancovr/postcode2coord.RData", verbose=1)`.
-    ## Evaluating cylinder exceedances from  01/01/15  to  24/11/16 .
-    ## Time difference of 2.642384 mins
+    ## Time difference of 3.149846 mins
 
 ``` r
 head(cylinders.2)
 ```
 
-    ##              x        y       rho t.low t.upp n_obs        mu       p.val
-    ## 1    5.6383687 5724.717  7.987403    27    41    26 14.068329 0.002776905
-    ## 2   -6.9825321 5893.372  9.107041     4    15     4  1.506170 0.066419281
-    ## 3  -88.4081075 5932.797  6.984781     0    13     9  7.381465 0.321824199
-    ## 4   -1.2414016 5733.114 11.757139    42    49    30 33.839933 0.768372193
-    ## 5   -0.5376942 5745.217  7.199748    57    74    18 13.633585 0.147727675
-    ## 6 -102.2708911 5726.610  9.107041    80    91     1  1.265458 0.717890066
-    ##   warning
-    ## 1    TRUE
-    ## 2   FALSE
-    ## 3   FALSE
-    ## 4   FALSE
-    ## 5   FALSE
-    ## 6   FALSE
+    ##            x        y      rho t.low t.upp n_obs        mu      p.val warning
+    ## 1  -4.565732 5782.775 14.56173    66    78     7  5.230448 0.27222953   FALSE
+    ## 2 -39.431829 6112.945 13.99046    12    25    27 17.817712 0.02536801    TRUE
+    ## 3 -89.611223 5979.242 16.81444    56    65    12  9.115878 0.20837666   FALSE
+    ## 4 -67.432738 5837.926 16.81444    17    26    19 23.455035 0.84773404   FALSE
+    ## 5  -2.764860 5740.000 12.61083    10    26    69 79.836310 0.89999698   FALSE
+    ## 6 -45.162555 5864.023 11.57249    17    36    13  8.069146 0.06718268   FALSE
 
 ``` r
 plotCylindersCI(cylinders.2, confidence.level = 0.95)
@@ -269,12 +254,12 @@ head(simulation_data)
     ## 5  AL100DR   47         64 epi.    1 51.76370 -0.2360576  AL100DR    64
     ## 6  AL100DR   51         64 epi.    1 51.76370 -0.2360576  AL100DR    64
     ##          y         x warning.score warning.score.2
-    ## 1 5756.180 -8.074648     0.8692308       0.9529412
-    ## 2 5756.180 -8.074648     0.8918269       0.9187935
-    ## 3 5756.180 -8.074648     0.9714994       0.9910941
-    ## 4 5756.123 -8.254003     0.9759036       0.9987294
-    ## 5 5756.123 -8.254003     0.9849315       0.9879357
-    ## 6 5756.123 -8.254003     0.9742015       0.9911055
+    ## 1 5756.180 -8.074648     0.8916479       0.8492063
+    ## 2 5756.180 -8.074648     0.8717340       0.7913043
+    ## 3 5756.180 -8.074648     0.9716216       0.9369658
+    ## 4 5756.123 -8.254003     0.9852744       0.9680511
+    ## 5 5756.123 -8.254003     0.9869754       0.9783105
+    ## 6 5756.123 -8.254003     0.9744624       0.9368984
 
 Assess concordance with ROC-AUC:
 
@@ -318,7 +303,7 @@ plot(ROC, add=T, col='red')
 print(ROC$auc)
 ```
 
-    ## Area under the curve: 0.9997
+    ## Area under the curve: 0.9993
 
 ``` r
 legend('bottomright', legend =  c('Using estimated baseline', 'Using true baseline'), lty=1, col=c('black','red'))
@@ -334,18 +319,19 @@ simulation_data$sqerr = (simulation_data$Y - simulation_data$warning.score)^2
 cat("MSE using estimated baseline:", mean(simulation_data$sqerr), '\n') 
 ```
 
-    ## MSE using estimated baseline: 0.02557394
+    ## MSE using estimated baseline: 0.02540727
 
 ``` r
 simulation_data$sqerr.2 = (simulation_data$Y - simulation_data$warning.score.2)^2
 cat("MSE using true baseline:", mean(simulation_data$sqerr.2), '\n') 
 ```
 
-    ## MSE using true baseline: 0.03922385
+    ## MSE using true baseline: 0.03199637
 
 And with a map:
 
 ``` r
+data("GB_region_boundaries")
 #plotBaseMap(add=F, xlim=c(-0.6,0.6), ylim=c(51.648,51.65))
 plotBaseMap(add=F, xlim=c(-1,1), ylim=c(50.648,52.65))
 points(simulation_data$longitude, simulation_data$latitude,
@@ -386,7 +372,7 @@ legend('topright',c('end.','true epi.', 'w>0.95'), pch=c(20,4,1), col=c(tab.blue
 ![](README_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
 \[1\] M. Cavallaro, J. Coelho, D. Ready, V. Decraene, T. Lamagni, N. D.
-McCarthy, D. Todkill, M. J. Keeling, Cluster detection with random
-neighbourhood covering: application to invasive Group A Streptococcal
-disease, 2021 medRxiv 2021.10.20.21264984; doi:
-<https://doi.org/10.1101/2021.10.20.21264984>
+McCarthy, D. Todkill, M. J. Keeling (2022) Cluster detection with random
+neighbourhood covering: Application to invasive Group A Streptococcal
+disease. PLoS Comput Biol 18(11): e1010726.
+<https://doi.org/10.1371/journal.pbci.1010726>
