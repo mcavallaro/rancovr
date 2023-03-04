@@ -62,9 +62,11 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
   observation.matrix = observation.matrix[,!(colnames(observation.matrix) == 'NA')]
 
   init = Sys.time()
-  coord.df = coord.df[!is.na(coord.df$latitude),]
-  coord.km.df = coord.df
-  coord.km.df[,c('y','x')]= vlatlong2km(coord.df[,c("latitude","longitude")])
+  
+  if (('latitude' %in% names(coord.df) & ('longitude' %in% names(coord.df)))){
+    coord.df = coord.df[!is.na(coord.df$latitude),]
+    coord.df[,c('y','x')]= vlatlong2km(coord.df[,c("latitude","longitude")])
+  }
   
   if ((week.range[1] < min(as.integer(colnames(observation.matrix)))) | (week.range[2] > max(as.integer(colnames(observation.matrix))))){
     A = sprintf("%d-%d", week.range[1], week.range[2])
@@ -78,12 +80,12 @@ CreateCylinders<-function(observation.matrix, baseline, week.range,
   #       as.character(week2Date(week.range[2])), ".\n")
   
   # generate cylinders
-  cylinders = rcylinder(n.cylinders, observation.matrix, week.range, radii_and_heights, coord.km.df, only.last)
+  cylinders = rcylinder(n.cylinders, observation.matrix, week.range, radii_and_heights, coord.df, only.last)
   if (NROW(cylinders) > 0){
     if (test){
-      tmp = t(apply(cylinders, 1, compute, observation.matrix, baseline, coord.km.df))
+      tmp = t(apply(cylinders, 1, compute, observation.matrix, baseline, coord.df))
     }else{
-      tmp = t(apply(cylinders, 1, compute.from.tab.baseline, observation.matrix, baseline, coord.km.df))
+      tmp = t(apply(cylinders, 1, compute.from.tab.baseline, observation.matrix, baseline, coord.df))
     }
 
     cylinders[,c('n_obs', 'mu', 'p.val')] = tmp
