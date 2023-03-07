@@ -9,7 +9,13 @@ Description: rancovr detects statio-temporal clusters against a baseline of spar
 URL: https://github.com/mcavallaro/rancovr
 License: MIT License
 Encoding: UTF-8
-LazyData: False
+LazyData: True
 Imports: Matrix, optimx, truncnorm, sf, jsonlite
 Suggested: spatstat, KernSmooth, tsne
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
