@@ -14,7 +14,8 @@ postcode.data = merge(postcode.data, population.data, by='postcode')
 idx = order(postcode.data$postcode)
 postcode.data = postcode.data[idx,]
 rm(idx)
-save(postcode.data, file = "data/population_per_postcode_with_coordinates.RData")
+usethis::use_data(postcode.data, overwrite = T)
+#save(postcode.data, file = "data/population_per_postcode_with_coordinates.RData")
 
 # postcode.data[,c('latitude', 'longitude')] = t(apply(postcode.data, 1, postcode.to.location2))
 

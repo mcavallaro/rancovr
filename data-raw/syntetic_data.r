@@ -1,6 +1,6 @@
 # simulate endemic component
 set.seed(1)
-data("population_per_postcode_with_coordinates")
+data("postcode.data")
 
 idx = sort(sample(NROW(postcode.data), 10000))
 postcode.data. = postcode.data[idx,]
@@ -13,8 +13,9 @@ time.factor = lambda(0:99, c(34, 16, 55,  0), names=T)
 total.average = 5000
 simulation = Simulate(sample.population, time.factor, total.average, save.baseline.matrix=T)
 baseline_for_sim=attributes(simulation)$baseline.matrix
-save(baseline_for_sim, file = "data/baseline_for_sim.RData")
 
+#save(baseline_for_sim, file = "data/baseline_for_sim.RData")
+usethis::use_data(baseline_for_sim, overwrite = T)
 
 simulation_data = as.data.frame(which(simulation == 1, arr.ind = TRUE))
 simulation_data$postcode = rownames(simulation)[simulation_data$row]
@@ -65,5 +66,6 @@ simulation_data$Males =NULL
 simulation_data$Females=NULL
 simulation_data$Occupied_Households=NULL
 
-#write.table(simulation_data, file = 'data/simulation_data.csv', sep=';', row.names = FALSE)
-save(simulation_data, file = "data/simulation_data.RData")
+# write.table(simulation_data, file = 'data/simulation_data.csv', sep=';', row.names = FALSE)
+# save(simulation_data, file = "data/simulation_data.RData")
+usethis::use_data(simulation_data, overwrite = T)
