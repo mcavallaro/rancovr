@@ -76,6 +76,9 @@ t = 15
 image(x, y, matrix(observation.matrix[,t], ncol=20), main = paste0('t=', as.character(t)))
 ```
 
+
+Retrospective usage. Draw all cylinders at once up until a date `TT`    with `only.last=FALSE` option and apply `warning.score2`:
+
 ```{r}
 cylinders = CreateCylinders(observation.matrix,
                             baseline.matrix, range(tt), n.cylinders = 1000,
@@ -86,13 +89,27 @@ plotCylindersCI(cylinders )
 
 
 ```{r}
-for(TT in tt){
+tmp = apply(d1, 1, FUN=warning.score2, 20, cylinders)
+d1[, 'retrospective'] = tmp[1,]
+head(d1)
+```
+
+
+Prospective usage. Draw cylinders up until a partial date  `TT`  with `only.last=TRUE` option and  apply `warning.score2` at each partial date:
+
+```{r}
+for (TT in tt){
+  cylinders = CreateCylinders(observation.matrix,
+                            baseline.matrix, range(tt), n.cylinders = 1000,
+                            coord.df = d1, size_factor = 4, GT = 5, only.last = T, TT = TT)
   colname =  paste0('warning.score.', as.character(TT))
   tmp = apply(d1, 1, FUN=warning.score2, TT, cylinders)
   d1[,colname] = tmp[1,]
 }
 head(d1)
 ```
+
+
 
 ## Vignette Info
 
