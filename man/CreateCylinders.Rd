@@ -10,7 +10,7 @@ CreateCylinders(
   week.range,
   n.cylinders = 1000,
   p.val.threshold = 0.05,
-  size_factor = 1,
+  size_factor = 40,
   rho,
   coord.df = NULL,
   GT = 24,
