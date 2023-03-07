@@ -1,21 +1,21 @@
 #' Draw random cylinder coordinates
 #' 
 #' Find the coordinates (centers and height limits) of cylinders
-#' that contain events defined in \code{observation.matrix}, with radia and heights
-#' given in \code{radia_and_heights}.
+#' that contain events defined in \code{observation.matrix}, with radii and heights
+#' given in \code{radii_and_heights}.
 #' 
 #' @param n.cylinders An \code{integer}; the number of cylinders to draw.
-#' @param observation.matrix A \code{sparseMatrix} object enconding the events.
+#' @param observation.matrix A \code{sparseMatrix} object encoding the events.
 #' @param time.range An \code{integer} vector.
-#' @param radia_and_heights A \code{Matrix}.
+#' @param radii_and_heights A \code{Matrix}.
 #' @param postcode2coord A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.
 #' @param only.last A \code{bool}; true if all cylinders must include the last time point (\code{time.range[2]}). For prospective analysis.
 #' @importFrom truncnorm rtruncnorm
 #' @import Matrix
-#' @return A \code(data.frame).
+#' @return A \code{data.frame}.
 #' @examples
-#' cylinders=rcylinder(10, observation.matrix, time.range, radia_and_heights, postcode2coord)
-rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heights, postcode2coord, only.last=F){
+#' cylinders=rcylinder(10, observation.matrix, time.range, radii_and_heights, postcode2coord)
+rcylinder<-function(n.cylinders, observation.matrix, time.range, radii_and_heights, postcode2coord, only.last=F){
   if (any(rownames(observation.matrix)=='NA')){
     cat("WARNING: any(rownames(observation.matrix)=='NA'")
   }
@@ -44,45 +44,45 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
     # print(head(t))
     tt = as.integer(colnames(observation.matrix[,cols])[idx_col])
 
-    # radia and heights are given as input in the matrix radia_and_heights
+    # radii and heights are given as input in the matrix radii_and_heights
 
-    radia_and_heights = radia_and_heights[sample(1:nrow(radia_and_heights), n.cylinders, replace=T),]
+    radii_and_heights = radii_and_heights[sample(1:nrow(radii_and_heights), n.cylinders, replace=T),]
     # randomise whilst keeping same radius and height and avoiding negative t
-    rho = radia_and_heights[, 2]
-    random_radia = runif(n.cylinders, 0, rho)
+    rho = radii_and_heights[, 2]
+    random_radii = runif(n.cylinders, 0, rho)
     theta = runif(n.cylinders, 0, 2* pi)
-    y = y + sin(theta) * random_radia
-    x = x + cos(theta) * random_radia
+    y = y + sin(theta) * random_radii
+    x = x + cos(theta) * random_radii
     
     t.min = as.integer(time.range[1])
     t.max = as.integer(time.range[2])
     
     if(only.last){
       t.upp = rep(t.max, length(x))
-      t.low = t.upp - as.integer(radia_and_heights[,1])
+      t.low = t.upp - as.integer(radii_and_heights[,1])
       t.low = ifelse(t.low < t.min, t.min, t.low)
     }else{
-      rrr = v.sample.int(as.integer(radia_and_heights[,1]) + 1, 1) - 1
+      rrr = v.sample.int(as.integer(radii_and_heights[,1]) + 1, 1) - 1
       t.low = tt - rrr
-      t.upp = t.low + as.integer(radia_and_heights[,1])
+      t.upp = t.low + as.integer(radii_and_heights[,1])
       t.upp = ifelse(t.low > t.min, t.upp, t.upp + (t.min - t.low))    
       t.low = ifelse(t.low > t.min, t.low, t.min)
       t.low = ifelse(t.upp < t.max, t.low, t.low - (t.upp - t.max) )
       t.upp = ifelse(t.upp < t.max, t.upp, t.max)
       t.low = as.integer(ifelse( (t.upp==t.max) & (t.low < t.min), t.min, t.low))      
     }
-    # tt = t + runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2)
+    # tt = t + runif(n.cylinders, -radii_and_heights[,1]/2, radii_and_heights[,1]/2)
     # if (only.last){
     #   t.upp = as.integer(time.range[2])
     # }else{
-    #   t.upp = ceiling(tt + radia_and_heights[,1] / 2)
+    #   t.upp = ceiling(tt + radii_and_heights[,1] / 2)
     # }
     # t.max = as.integer(time.range[2])
     # if (only.last){
-    #   t.low = floor(t.upp - radia_and_heights[,1])
+    #   t.low = floor(t.upp - radii_and_heights[,1])
     #   t.low = ifelse(t < t.low, t, t.low)
     # }else{
-    #   t.low = floor(tt - radia_and_heights[,1] / 2)
+    #   t.low = floor(tt - radii_and_heights[,1] / 2)
     # }
     # t.min = as.integer(time.range[1])
     
@@ -97,24 +97,24 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
 
     # # QUESTO FUNZIONA:
     # # t = cases[idx,2] + week.range[1] - 1
-    # # # radia and heights are given as input in the matrix radia_and_heights
+    # # # radii and heights are given as input in the matrix radii_and_heights
 
-    # # radia_and_heights = radia_and_heights[sample(1:nrow(radia_and_heights), n.cylinders, replace=T),]
+    # # radii_and_heights = radii_and_heights[sample(1:nrow(radii_and_heights), n.cylinders, replace=T),]
     # # #randomise wilst keeping same radius and height and avoiding negative t
-    # # rho = radia_and_heights[,2]
+    # # rho = radii_and_heights[,2]
     
-    # # random_radia = runif(n.cylinders, 0, rho)
+    # # random_radii = runif(n.cylinders, 0, rho)
     # # theta = runif(n.cylinders, 0, 2* pi)
 
-    # # y = yy + sin(theta) * random_radia
-    # # x = xx + cos(theta) * random_radia
+    # # y = yy + sin(theta) * random_radii
+    # # x = xx + cos(theta) * random_radii
     # # tt = as.integer(t)
-    # # # t = t + round(runif(n.cylinders, -radia_and_heights[,1]/2, radia_and_heights[,1]/2))
+    # # # t = t + round(runif(n.cylinders, -radii_and_heights[,1]/2, radii_and_heights[,1]/2))
     # # v.sample.int<-Vectorize(sample.int, 'n')
-    # # rrr = v.sample.int(as.integer(radia_and_heights[,1]) + 1, 1) - 1
+    # # rrr = v.sample.int(as.integer(radii_and_heights[,1]) + 1, 1) - 1
     # # t.low = tt - rrr
-    # # t.upp = t.low + as.integer(radia_and_heights[,1])
-    # # # t.low = t - round(radia_and_heights[,1] / 2)
+    # # t.upp = t.low + as.integer(radii_and_heights[,1])
+    # # # t.low = t - round(radii_and_heights[,1] / 2)
     # # t.min = as.integer(week.range[1])
     # # t.max = as.integer(week.range[2])
     
@@ -135,7 +135,7 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
 
 
 
-#' Compute exceedance probabality in a cylinder.
+#' Compute exceedance probability in a cylinder.
 #' 
 #' A cylinder is defined by the circle coordinated (say, x,y, and radius) and lower and upper height limits (aay, t.low and t.upp, respectively).
 #' For a given cylinder, this function computes the number of observed events (\code{n_cases}) in the cylinder according to
@@ -144,8 +144,8 @@ rcylinder<-function(n.cylinders, observation.matrix, time.range, radia_and_heigh
 #' The function returns \code{c(n_cases, mu, p.val)}.
 #' 
 #' @param cylinder 
-#' @param observation.matrix A \code{sparseMatrix} object enconding the events.
-#' @param baseline.matrix A \code{Matrix} object enconding the baseline.
+#' @param observation.matrix A \code{sparseMatrix} object encoding the events.
+#' @param baseline.matrix A \code{Matrix} object encoding the baseline.
 #' @param postcode.locations A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.
 #' @import Matrix
 #' @return A \code{numeric} vector of dimension 3.
@@ -173,7 +173,7 @@ compute<-function(cylinder, observation.matrix, baseline.matrix, postcode.locati
 }
 
 
-#' Compute exceedance probabality in a cylinder.
+#' Compute exceedance probability in a cylinder.
 #' 
 #' A cylinder is defined by the circle coordinated (say, x,y, and radius) and lower and upper height limits (aay, t.low and t.upp, respectively).
 #' For a given cylinder, this function computes the number of observed events (\code{n_cases}) in the cylinder according to
@@ -182,8 +182,8 @@ compute<-function(cylinder, observation.matrix, baseline.matrix, postcode.locati
 #' The function returns \code{c(n_cases, mu, p.val)}.
 #' 
 #' @param cylinder 
-#' @param observation.matrix A \code{sparseMatrix} object enconding the events.
-#' @param tab.baseline An \code{expand.grid} tab enconding the baseline.
+#' @param observation.matrix A \code{sparseMatrix} object encoding the events.
+#' @param tab.baseline An \code{expand.grid} tab encoding the baseline.
 #' @param postcode.locations A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.
 #' @import Matrix
 #' @return A \code{numeric} vector of dimension 3.
@@ -292,16 +292,25 @@ compute.from.tab.baseline<-function(cylinder, observation.matrix, tab.baseline, 
 #   }
 # }
 
-
+#' Compute the warning score of a case (location and date). 
+#' 
+#' Compute the warning score of a case -- defined by its location (coordinates) 
+#' and data -- for a given set of cylinders (computed with \code{}).
+#' It can be used in \code{apply}.
+#' 
+#' @param case A \code{numeric}; .
+#' @param cylinders A \code{data.frame} object encoding the events.
+#' @param date.time.field A \code{character}.
+#' @return A \code{numeric}.
+#' @examples
+#' warning.scores = apply(cases, 1, warning.score, cylinders)
 warning.score<-function(case, cylinders, date.time.field = 'week'){
   x = as.numeric(case['x'])
   y = as.numeric(case['y'])
   TT = as.numeric(case[date.time.field])
-  
   d = sqrt((cylinders$x - x)^2 + (cylinders$y - y)^2)
   in_circle = as.integer(d <= cylinders$rho)
   in_cylinder_height = as.integer((cylinders$t.low <= TT) & (cylinders$t.upp >= TT))
-  
   # number of cylinders that include geo-coordinate of `case`
   in_cylinder = sum(in_circle * in_cylinder_height, na.rm=T)
   if (in_cylinder>0){
@@ -315,15 +324,25 @@ warning.score<-function(case, cylinders, date.time.field = 'week'){
 }
 
 
+#' Compute the warning score of a case (location and date). 
+#' 
+#' Compute the warning score of a case -- defined by its location (coordinates) 
+#' and data -- for a given set of cylinders (computed with \code{CreateCylinders}).
+#' It can be used in \code{apply}.
+#' 
+#' @param case A \code{numeric}; .
+#' @param cylinders A \code{data.frame} object encoding the events.
+#' @param TT An \code{integer}.
+#' @return A \code{numeric} vector of size two.
+#' @examples
+#' tmp = apply(cases, 1, warning.score, TT, cylinders)
+#' warning.score = tmp[1,]
 warning.score2 <-function(case, TT, cylinders) {
-  
   x = as.numeric(case['x'])
   y = as.numeric(case['y'])
-
   d = sqrt((cylinders$x - x)^2 + (cylinders$y - y)^2)
   in_circle = as.integer(d <= cylinders$rho)
   in_cylinder_height = as.integer((cylinders$t.low <= TT) & (cylinders$t.upp >= TT))
-  
   # number of cylinders that include geo-coordinate of `case`
   in_cylinder = sum(in_circle * in_cylinder_height, na.rm=T)
   if (in_cylinder>0){
@@ -340,7 +359,6 @@ warning.score2 <-function(case, TT, cylinders) {
 
 
 relative_incidence <-function(case, TT, cylinders) {
-
   x = as.numeric(case['x'])
   y = as.numeric(case['y'])
 

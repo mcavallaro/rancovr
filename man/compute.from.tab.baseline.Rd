@@ -2,7 +2,7 @@
 % Please edit documentation in R/surveillance_utils.r
 \name{compute.from.tab.baseline}
 \alias{compute.from.tab.baseline}
-\title{Compute exceedance probabality in a cylinder.}
+\title{Compute exceedance probability in a cylinder.}
 \usage{
 compute.from.tab.baseline(
   cylinder,
@@ -14,9 +14,9 @@ compute.from.tab.baseline(
 \arguments{
 \item{cylinder}{}
 
-\item{observation.matrix}{A \code{sparseMatrix} object enconding the events.}
+\item{observation.matrix}{A \code{sparseMatrix} object encoding the events.}
 
-\item{tab.baseline}{An \code{expand.grid} tab enconding the baseline.}
+\item{tab.baseline}{An \code{expand.grid} tab encoding the baseline.}
 
 \item{postcode.locations}{A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.}
 }

@@ -2,16 +2,16 @@
 % Please edit documentation in R/surveillance_utils.r
 \name{compute}
 \alias{compute}
-\title{Compute exceedance probabality in a cylinder.}
+\title{Compute exceedance probability in a cylinder.}
 \usage{
 compute(cylinder, observation.matrix, baseline.matrix, postcode.locations)
 }
 \arguments{
 \item{cylinder}{}
 
-\item{observation.matrix}{A \code{sparseMatrix} object enconding the events.}
+\item{observation.matrix}{A \code{sparseMatrix} object encoding the events.}
 
-\item{baseline.matrix}{A \code{Matrix} object enconding the baseline.}
+\item{baseline.matrix}{A \code{Matrix} object encoding the baseline.}
 
 \item{postcode.locations}{A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.}
 }

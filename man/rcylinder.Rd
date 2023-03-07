@@ -8,7 +8,7 @@ rcylinder(
   n.cylinders,
   observation.matrix,
   time.range,
-  radia_and_heights,
+  radii_and_heights,
   postcode2coord,
   only.last = F
 )
@@ -16,24 +16,24 @@ rcylinder(
 \arguments{
 \item{n.cylinders}{An \code{integer}; the number of cylinders to draw.}
 
-\item{observation.matrix}{A \code{sparseMatrix} object enconding the events.}
+\item{observation.matrix}{A \code{sparseMatrix} object encoding the events.}
 
 \item{time.range}{An \code{integer} vector.}
 
-\item{radia_and_heights}{A \code{Matrix}.}
+\item{radii_and_heights}{A \code{Matrix}.}
 
 \item{postcode2coord}{A \code{data.frame} that maps the rows of \code{observation.matrix} to geographical coordinates.}
 
 \item{only.last}{A \code{bool}; true if all cylinders must include the last time point (\code{time.range[2]}). For prospective analysis.}
 }
 \value{
-A \code(data.frame).
+A \code{data.frame}.
 }
 \description{
 Find the coordinates (centers and height limits) of cylinders
-that contain events defined in \code{observation.matrix}, with radia and heights
-given in \code{radia_and_heights}.
+that contain events defined in \code{observation.matrix}, with radii and heights
+given in \code{radii_and_heights}.
 }
 \examples{
-cylinders=rcylinder(10, observation.matrix, time.range, radia_and_heights, postcode2coord)
+cylinders=rcylinder(10, observation.matrix, time.range, radii_and_heights, postcode2coord)
 }
