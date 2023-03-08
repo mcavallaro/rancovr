@@ -5,9 +5,9 @@
 \alias{simulation_data}
 \title{Simulation data.}
 \format{
-A data frame with 5028 rows and 9 variables:
+A \code{data.frame} with 5028 rows and 9 variables:
 \describe{
-  \item{week}
+  \item{week}{}
   \item{postcode}{}
   \item{population}{}
   \item{sim}{}

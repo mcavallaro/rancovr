@@ -10,7 +10,7 @@ postcode.to.location3(x)
 \item{x}{integer. number of cylinder samples.}
 }
 \value{
-A \code(data.frame).
+A \code{data.frame}.
 }
 \description{
 postcode.to.location3

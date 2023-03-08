@@ -18,7 +18,7 @@ A \code{numeric}.
 }
 \description{
 Compute the warning score of a case -- defined by its location (coordinates) 
-and data -- for a given set of cylinders (computed with \code{}).
+and data -- for a given set of cylinders (computed with \code{CreateCylinders}).
 It can be used in \code{apply}.
 }
 \examples{

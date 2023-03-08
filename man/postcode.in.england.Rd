@@ -12,7 +12,7 @@ postcode.in.england(x, postcode.field = "postcode")
 \item{postcode.field}{numeric.}
 }
 \value{
-A \code(data.frame).
+A \code{data.frame}.
 }
 \description{
 Check if postcode is in England.

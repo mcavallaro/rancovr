@@ -37,7 +37,7 @@ postcode.to.location<-function(x, postcodes){
 #' @param postcodes numeric.
 #' @param postcode.field numeric.
 #' @importFrom jsonlite read_json
-#' @return A \code(data.frame).
+#' @return A \code{data.frame}.
 postcode.to.location.and.population<-function(x, postcodes, postcode.field='postcode'){
   # A = gsub(" ", "", toupper(postcodes['Patient.Postcode']),  fixed = TRUE)
   B = gsub(" ", "", toupper(x[postcode.field]),  fixed = TRUE)
@@ -69,7 +69,7 @@ postcode.to.location.and.population<-function(x, postcodes, postcode.field='post
 #' @param x integer. number of cylinder samples.
 #' @param postcode.field numeric.
 #' @importFrom jsonlite read_json
-#' @return A \code(data.frame).
+#' @return A \code{data.frame}.
 postcode.in.england<-function(x, postcode.field='postcode'){
   jsn = read_json(paste0("http://api.getthedata.com/postcode/", gsub(" ", "", x[postcode.field],  fixed = TRUE)))
   country = jsn$data$country
@@ -94,7 +94,7 @@ postcode.in.england<-function(x, postcode.field='postcode'){
 #' @param x integer. number of cylinder samples.
 #' @param postcode.field numeric.
 #' @importFrom jsonlite read_json
-#' @return A \code(data.frame).
+#' @return A \code{data.frame}.
 postcode.to.location2<-function(x, postcode.field='postcode'){
 #  B = gsub(" ", "", x[postcode.field],  fixed = TRUE)
   B = paste0("http://api.getthedata.com/postcode/", x[postcode.field])
@@ -114,7 +114,7 @@ postcode.to.location2<-function(x, postcode.field='postcode'){
 #' 
 #' @param x integer. number of cylinder samples.
 #' @importFrom jsonlite read_json
-#' @return A \code(data.frame).
+#' @return A \code{data.frame}.
 postcode.to.location3<-function(x){
   B = gsub(" ", "", x,  fixed = TRUE)
   B = paste0("http://api.getthedata.com/postcode/", B)
@@ -134,7 +134,7 @@ postcode.to.location3<-function(x){
 #' @param x integer. number of cylinder samples.
 #' @param Area2Region_list numeric.
 #' @importFrom jsonlite read_json
-#' @return A \code(data.frame)
+#' @return A \code{data.frame}
 postcode.to.region<-function(x, Area2Region_list){
   # B = gsub(" ", "", x,  fixed = TRUE)
   # B = paste0("http://api.getthedata.com/postcode/", B)

@@ -14,7 +14,7 @@ postcode.to.location.and.population(x, postcodes, postcode.field = "postcode")
 \item{postcode.field}{numeric.}
 }
 \value{
-A \code(data.frame).
+A \code{data.frame}.
 }
 \description{
 Find geo coordinates and population from postcode data frame.

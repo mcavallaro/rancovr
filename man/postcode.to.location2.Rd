@@ -12,7 +12,7 @@ postcode.to.location2(x, postcode.field = "postcode")
 \item{postcode.field}{numeric.}
 }
 \value{
-A \code(data.frame).
+A \code{data.frame}.
 }
 \description{
 postcode.to.location2

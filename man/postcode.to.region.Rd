@@ -12,7 +12,7 @@ postcode.to.region(x, Area2Region_list)
 \item{Area2Region_list}{numeric.}
 }
 \value{
-A \code(data.frame)
+A \code{data.frame}
 }
 \description{
 postcode.to.region
