@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-# devtools::load_all()
+devtools::load_all()
 ```
 
 
@@ -51,8 +51,9 @@ To visualize the baseline at a specific time, the built-in R function `image` ca
 
 
 ```{r, fig.show='hold'}
-image(x, y, matrix(baseline.matrix[,5], ncol=20), main='t=5')
-image(x, y, matrix(baseline.matrix[,15], ncol=20), main='t=15')
+b=seq(-0.5,max(baseline.matrix),length=13)
+image(x, y, matrix(baseline.matrix[,5], ncol=20), main='t=5', breaks=b)
+image(x, y, matrix(baseline.matrix[,15], ncol=20), main='t=15', breaks=b)
 ```
 
 
@@ -71,8 +72,9 @@ colnames(observation.matrix) = as.character(tt)
 
 We can use the `image` function to illustrate the distribution of events generated from the baseline and compare it with the original baseline.
 ```{r, fig.show='hold'}
-image(x, y, matrix(observation.matrix[,5], ncol=20), main='t=5')
-image(x, y, matrix(observation.matrix[,15], ncol=20), main='t=15')
+b=seq(-0.5, max(observation.matrix), length = 13)
+image(x, y, matrix(observation.matrix[,5], ncol = 20), main = 't=5', breaks = b)
+image(x, y, matrix(observation.matrix[,15], ncol = 20), main = 't=15', breaks = b)
 ```
 
 The aggregated observations and baseline are similar, within statistical fluctuations.
@@ -87,16 +89,16 @@ legend('bottomright', c('observation', 'baseline'), pch=c(1, NA), lty=c(NA, 1))
 We will now introduce a set of discrete events at selected locations and times that do not conform to the known baseline. This set of events will be referred to as a "novel cluster", and it is important that the algorithm is capable of detecting these points.
 
 ```{r}
-observation.matrix[30:35, 10:15] = observation.matrix[30:35, 10:15] + rpois(36, 1)
+observation.matrix[30:35, 10:15] = observation.matrix[30:35, 10:15] + rpois(36, 0.5)
 ```
 
 
 
 ```{r, fig.show='hold'}
 t = 5
-image(x, y, matrix(observation.matrix[,t], ncol=20), main = paste0('t=', as.character(t)))
+image(x, y, matrix(observation.matrix[,t], ncol=20), main = paste0('t=', as.character(t)), breaks = b)
 t = 15
-image(x, y, matrix(observation.matrix[,t], ncol=20), main = paste0('t=', as.character(t)))
+image(x, y, matrix(observation.matrix[,t], ncol=20), main = paste0('t=', as.character(t)), breaks = b)
 ```
 
 ```{r, fig.width=5, fig.height=4}
@@ -110,7 +112,7 @@ legend('bottomright', c('observation', 'baseline'), pch=c(1, NA), lty=c(NA, 1))
 We now utilise `rancovr` to identify the cluster of atypical events. 
 Retrospectively, we generate all possible cylinders up until a specified date `TT` using the function `CreateCylinders` with the `only.last=FALSE` option.
 
-```
+```{r}
 cylinders = CreateCylinders(observation.matrix,
                             baseline.matrix, range(tt), n.cylinders = 1000,
                             coord.df = d1, size_factor = 4, GT = 5)
@@ -121,23 +123,23 @@ head(cylinders)
 
 Each cylinder encompasses a number of observed events. The expected number of events in each cylinder is determined by the Poisson statistics and can be plotted against the actual number of observed events using the `plotCylindersCI` function. This can help us identify cylinders that contain a significantly higher number of events than what would be expected based on the baseline.
 
-```
+```{r}
 plotCylindersCI(cylinders )
 ```
 
 We then apply the function `warning.score2` to all grid locations to extract warning scores given the cylinders.
-```
+```{r}
 tmp = apply(d1, 1, FUN=warning.score2, 20, cylinders)
 d1[, 'retrospective'] = tmp[1,]
 head(d1)
 ```
 
 
-## Prospective usage 1
+## Prospective usage 
 
 `rancover` can be also prospectively, the same as what you would have got if you'd done it in realtime.
 Draw cylinders up until a partial date  `TT`  with `only.last=TRUE` option and  apply `warning.score2` at each partial date. Setting `only.last=TRUE` generate cylinders that do not extend past the time `TT`.
-These cyliders cover present or past events and extend up until the current day (and not in the future).
+These cylinders cover present or past events and extend up until the current day (and not in the future).
 
 
 ```
