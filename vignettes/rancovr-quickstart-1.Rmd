@@ -1,5 +1,5 @@
 ---
-title: "rancovr quickstart 1"
+title: "rancovr quickstart"
 author: "Massimo Cavallaro"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -14,25 +14,30 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+# devtools::load_all()
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
 
+The package `rancovr` provides a family of functions for detecting anomalies with the RAndom Neighbourhood COVeRing.
+This method is particularly useful in epidemiological studies where one needs to evaluate whether a set of infection events occurring in a certain space and time is of concern and deviates from a null model prediction. In other words
+ `rancovr` can help researchers compare observed data against null model predictions and determine whether the events are atypical or deviate significantly from what would be expected under the null model.
+ 
+This vignette only provides a brief overview of the package. For a more comprehensive understanding of the methodology and its applications, we refer to references [[1]](#1) and [[2]].
+The package includes two primary functions,  `CreateCylinders` and `warning.score`.
+The `CreateCylinders` function is used to generate cylindrical shapes that cover the spatio-temporal events of interest. Once the cylindrical shapes have been generated, the `warning.score` function can be used to aggregate the information from all cylinders and calculate a continuous score between zero and one for each event. This score provides a measure of the event's deviation from the expected behavior under a given null model.
 
 
 ## Create dataset
+
+The RAndom Neighbourhood COVeRing is designed to compare counts of discrete events with a baseline. In `rancovr` the baseline can be defined using a spatio-temporal grid, where the spatial component is expanded into rows using the `expand.grid` function (built-in in base R) and the columns represent time steps.
 
 ```{r}
 x <- seq(0, 10, length.out = 20)
 y <- seq(0, 10, length.out = 20)
 tt = seq(1, 20)
 d1 <- expand.grid(x = x, y = y)
-d1$names = paste('loc', as.character(1:20), as.character(1:10), sep = '-')
+d1$names = paste('loc', as.character(1:20),  sep = '-')
 baseline.matrix = sapply(tt, function( . ){
   exp(- (d1$x - 5)^2 - (d1$y - 5)^2 )  *  cos( 0.2 * . )^2} )
 rownames(baseline.matrix) = d1$names
@@ -40,15 +45,19 @@ colnames(baseline.matrix) = as.character(tt)
 baseline.matrix[1:5, 1:5]
 ```
 
+The values of `baseline.matrix` at row `i` and column `j` 
+represent the expected number of events at location `i` during time step `j`.
+To visualize the baseline at a specific time, the built-in R function `image` can be used to plot the matrix. In the resulting plot, darker colors indicate higher expected event counts.
 
-##
 
 ```{r, fig.show='hold'}
-image(x, y, matrix(baseline.matrix[,1], ncol=20))
-image(x, y, matrix(baseline.matrix[,2], ncol=20))
+image(x, y, matrix(baseline.matrix[,5], ncol=20), main='t=5')
+image(x, y, matrix(baseline.matrix[,15], ncol=20), main='t=15')
 ```
 
-##
+
+To generate observations from this baseline, we   use the built-in R function `rpois`. Since these observations are generated from the baseline, they should not raise any alarms.
+
 
 ```{r}
 observation.matrix = matrix(
@@ -57,47 +66,81 @@ observation.matrix = matrix(
 
 rownames(observation.matrix) = d1$names
 colnames(observation.matrix) = as.character(tt)
-
-observation.matrix[30:35, 10:15] = observation.matrix[30:35, 10:15] + rpois(36, 1)
 ```
 
-```{r}
-plot(colSums(observation.matrix))
+
+We can use the `image` function to illustrate the distribution of events generated from the baseline and compare it with the original baseline.
+```{r, fig.show='hold'}
+image(x, y, matrix(observation.matrix[,5], ncol=20), main='t=5')
+image(x, y, matrix(observation.matrix[,15], ncol=20), main='t=15')
+```
+
+The aggregated observations and baseline are similar, within statistical fluctuations.
+
+```{r, fig.width=5, fig.height=4}
+plot(colSums(observation.matrix), ylab='', xlab='t')
 lines(colSums(baseline.matrix))
+legend('bottomright', c('observation', 'baseline'), pch=c(1, NA), lty=c(NA, 1))
+```
+
+
+We will now introduce a set of discrete events at selected locations and times that do not conform to the known baseline. This set of events will be referred to as a "novel cluster", and it is important that the algorithm is capable of detecting these points.
+
+```{r}
+observation.matrix[30:35, 10:15] = observation.matrix[30:35, 10:15] + rpois(36, 1)
 ```
 
 
 
 ```{r, fig.show='hold'}
-t = 9
-image(x, y, matrix(observation.matrix[,t], ncol=20), ncol=20
-      , breaks = 1:5 - 0.5, main = paste0('t=', as.character(t)))
+t = 5
+image(x, y, matrix(observation.matrix[,t], ncol=20), main = paste0('t=', as.character(t)))
 t = 15
 image(x, y, matrix(observation.matrix[,t], ncol=20), main = paste0('t=', as.character(t)))
 ```
 
+```{r, fig.width=5, fig.height=4}
+plot(colSums(observation.matrix), ylab='', xlab='t')
+lines(colSums(baseline.matrix))
+legend('bottomright', c('observation', 'baseline'), pch=c(1, NA), lty=c(NA, 1))
+```
 
-Retrospective usage. Draw all cylinders at once up until a date `TT`    with `only.last=FALSE` option and apply `warning.score2`:
+## Retrospective usage
 
-```{r}
+We now utilise `rancovr` to identify the cluster of atypical events. 
+Retrospectively, we generate all possible cylinders up until a specified date `TT` using the function `CreateCylinders` with the `only.last=FALSE` option.
+
+```
 cylinders = CreateCylinders(observation.matrix,
                             baseline.matrix, range(tt), n.cylinders = 1000,
                             coord.df = d1, size_factor = 4, GT = 5)
 head(cylinders)
-plotCylindersCI(cylinders )
 ```
 
 
-```{r}
+
+Each cylinder encompasses a number of observed events. The expected number of events in each cylinder is determined by the Poisson statistics and can be plotted against the actual number of observed events using the `plotCylindersCI` function. This can help us identify cylinders that contain a significantly higher number of events than what would be expected based on the baseline.
+
+```
+plotCylindersCI(cylinders )
+```
+
+We then apply the function `warning.score2` to all grid locations to extract warning scores given the cylinders.
+```
 tmp = apply(d1, 1, FUN=warning.score2, 20, cylinders)
 d1[, 'retrospective'] = tmp[1,]
 head(d1)
 ```
 
 
-Prospective usage. Draw cylinders up until a partial date  `TT`  with `only.last=TRUE` option and  apply `warning.score2` at each partial date:
+## Prospective usage 1
 
-```{r}
+`rancover` can be also prospectively, the same as what you would have got if you'd done it in realtime.
+Draw cylinders up until a partial date  `TT`  with `only.last=TRUE` option and  apply `warning.score2` at each partial date. Setting `only.last=TRUE` generate cylinders that do not extend past the time `TT`.
+These cyliders cover present or past events and extend up until the current day (and not in the future).
+
+
+```
 for (TT in tt){
   cylinders = CreateCylinders(observation.matrix,
                             baseline.matrix, range(tt), n.cylinders = 1000,
@@ -108,47 +151,23 @@ for (TT in tt){
 }
 head(d1)
 ```
-
-
-
+ 
 ## Vignette Info
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
 
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r}
+sessionInfo()
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+## References
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+<a id="1">[1]</a>
+M. Cavallaro, J. Coelho, D. Ready, V. Decraene, T. Lamagni, N. D. McCarthy, D. Todkill, M. J. Keeling (2022)
+Cluster detection with random neighbourhood covering: Application to invasive Group A Streptococcal disease. PLoS Comput Biol 18(11): e1010726.
+https://doi.org/10.1371/journal.pcbi.1010726
 
-## More Examples
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+<a id="1">[2]</a>
+M. Cavallaro, L. Dyson, M. J. Keeling (2023) Manuscript in preparation.
