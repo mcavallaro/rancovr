@@ -327,7 +327,7 @@ warning.score<-function(case, cylinders, date.time.field = 'week'){
 #' Compute the warning score of a case (location and date). 
 #' 
 #' Compute the warning score of a case -- defined by its location (coordinates) 
-#' and data -- for a given set of cylinders (computed with \code{CreateCylinders}).
+#' and date -- from a given data.frame of cylinders (computed with \code{CreateCylinders}).
 #' It can be used in \code{apply}.
 #' 
 #' @param case A \code{numeric}; .
@@ -358,7 +358,24 @@ warning.score2 <-function(case, TT, cylinders) {
 
 
 
-relative_incidence <-function(case, TT, cylinders) {
+#' Compute the average of a selected field of a case (location and date). 
+#' 
+#' Compute the average of a selected generic field of a case, a case being defined by its location (coordinates) 
+#' and date -- from a given data.frame of cylinders (computed with \code{CreateCylinders}).
+#' It can be used in \code{apply}. A single spatio-temporal cylinder, and the cases contained in it, can define
+#' a number of different quantities (for example the number of test performed in it or the results of these tests).
+#' These quantities can be saved as a field in the `cylinder` data.frame. The `average.score` function averages 
+#' the values of this field over all cylinders that cover the spatio-temporal event identified by `case`.
+#' 
+#' @param case A \code{numeric}; .
+#' @param cylinders A \code{data.frame} object encoding the events.
+#' @param TT An \code{integer}.
+#' @param field A \code{character} string indicating the name of the field
+#' @return A \code{numeric} vector of size two.
+#' @examples
+#' tmp = apply(cases, 1, warning.score, TT, cylinders)
+#' warning.score = tmp[1,]
+average.score<-function(case, TT, cylinders, field){
   x = as.numeric(case['x'])
   y = as.numeric(case['y'])
 
@@ -367,10 +384,10 @@ relative_incidence <-function(case, TT, cylinders) {
   in_cylinder_height = as.integer((cylinders$t.low <= TT) & (cylinders$t.upp >= TT))
 
   # number of cylinders that include geo-coordinate of `case`
-  in_cylinder = sum(in_circle * in_cylinder_height, na.rm=T)
+  in_cylinder = sum(in_circle * in_cylinder_height, na.rm = T)
   if (in_cylinder>0){
-    cylinder_relative_incidence = sum(cylinders$cylinder_relative_incidence * in_circle * in_cylinder_height, na.rm=T)
-    re = c(cylinder_relative_incidence / in_cylinder, in_cylinder)
+    sum_over_in_cylinders = sum(cylinders[field] * in_circle * in_cylinder_height, na.rm = T)
+    re = c(sum_over_in_cylinders / in_cylinder, in_cylinder)
   }else{
     re = c(0, 0)
   } 
@@ -381,4 +398,7 @@ relative_incidence <-function(case, TT, cylinders) {
 
 
 
-
+# Legacy function
+relative_incidence<-function(case, TT, cylinders){
+	average.score(case, TT, cylinders, field = 'cylinder_relative_incidence')
+}
