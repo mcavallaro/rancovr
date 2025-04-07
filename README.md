@@ -3,7 +3,7 @@
 `rancovr` is a statistical software package written in R for disease
 cluster and anomaly detection. It implements the Random Neighbourhood
 Covering (RaNCover) approach of reference \[1\]. RaNCover assigns a
-score *w* ∈ \[0, 1\] to each records. A high score suggests that the
+score *w* ∈ \[0, 1\] to each record. A high score suggests that a
 record is likely to be part of a cluster (e.g., it is an infection case
 caused by a local outbreak), while a low score suggests that the record
 is consistent with a baseline of sporadic cases.
